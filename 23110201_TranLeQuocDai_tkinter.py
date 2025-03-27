@@ -8,6 +8,11 @@ from tkinter.scrolledtext import ScrolledText
 import time
 import csv
 
+# nhóm 1: bfs, dfs, iddfs, ucs -> tìm kiếm không dùng heuristic
+# nhóm 2: greedy, a*, ida* -> tìm kiếm dùng heuristic
+# nhóm 3: Local search -> Hill Climbing:
+                        # Simple hill Climbing (leo đồi đơn giản)
+
 # ============ Các hàm giải thuật (không đổi) ============
 def parse_puzzle_input(input_str):
     parts = input_str.strip().split(',')
@@ -24,6 +29,7 @@ def get_neighbors(state):
         'left':  ( 0, -1),
         'right': ( 0,  1)
     }
+
     for (dr, dc) in moves.values():
         new_row = row + dr
         new_col = col + dc
@@ -47,6 +53,7 @@ def bfs(start, goal):
             if neighbor not in visited:
                 visited.add(neighbor)
                 queue.append((neighbor, path + [neighbor]))
+                queue
     return None, expansions
 
 def dfs(start, goal):
@@ -191,13 +198,76 @@ def ida_star(start, goal):
             return None, expansions[0]
         threshold = new_threshold
 
-# ============ 8-Puzzle App với ma trận nhập START & GOAL =============
+def simple_hill_climbing(start, goal):
+    def evaluate(state):
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+    current_state = start
+    expansions = 0
+    while True:
+        expansions += 1
+        neighbors = get_neighbors(current_state)
+        next_state = None
+        for neighbor in neighbors:
+            if evaluate(neighbor) < evaluate(current_state):
+                next_state = neighbor
+                break
+        if next_state is None:
+            break
+        current_state = next_state
+        if current_state == goal:
+            return current_state, expansions
+    return None, expansions
+
+def stepest_ascent_hill_climbing(start, goal):
+    def evaluate(state):
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+    
+    current_state = start
+
+    expansions = 0
+
+    while True:
+        expansions += 1
+        neighbors = get_neighbors(current_state)
+        best_neighbor = None
+        best_score = evaluate(current_state)
+        
+        for neighbor in neighbors:
+            score = evaluate(neighbor)
+            if score < best_score:
+                best_score = score
+                best_neighbor = neighbor
+
+        if best_score is None or best_score >= evaluate(current_state):
+            break
+        current_state = best_neighbor
+
+        if current_state == goal:
+            return current_state, expansions
+
+    return None, expansions
+
+# ============ 8-Puzzle App =============
 class PuzzleApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("8-Puzzle - Nhập START & GOAL dạng ma trận 3x3")
         self.geometry("1200x650")
-        self.configure(bg="#E8F6F3")
+        self.configure(bg="#F0F4F8")
 
         self.start_state = None
         self.goal_state = None
@@ -206,144 +276,137 @@ class PuzzleApp(tk.Tk):
         self.playing = False
         self.paused = False
 
-        main_frame = tk.Frame(self, bg="white")
+        # Thiết lập style cho giao diện
+        self.style = ttk.Style()
+        self.style.configure("TLabel", font=("Arial", 12, "bold"), background="#F0F4F8")
+        self.style.configure("TButton", font=("Arial", 10))
+        self.style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+
+        main_frame = ttk.Frame(self, padding=10)
         main_frame.pack(expand=True, fill="both")
 
-        # LEFT
-        left_frame = tk.Frame(main_frame, bg="#E8F6F3", width=300)
-        left_frame.pack(side="left", fill="y", padx=20, pady=20)
+        # Phần trái: Điều khiển
+        self.setup_left_frame(main_frame)
+        
+        # Phần giữa: Bảng puzzle
+        self.setup_center_frame(main_frame)
+        
+        # Phần phải: Log
+        self.setup_right_frame(main_frame)
 
-        # Matrix
-        matrix_frame = tk.Frame(left_frame, bg="#E8F6F3")
-        matrix_frame.pack(pady=10)
+    def setup_left_frame(self, main_frame):
+        left_frame = ttk.Frame(main_frame, width=350)
+        left_frame.pack(side="left", fill="y", padx=(0, 10))
 
-        # START
-        self.start_matrix = []
-        start_frame = tk.Frame(matrix_frame, bg="#E8F6F3")
-        start_frame.grid(row=1, column=0, padx=10)
-        tk.Label(matrix_frame, text="Initial State:", font=("Arial", 12, "bold"), bg="#E8F6F3")\
-            .grid(row=0, column=0)
-        for r in range(3):
-            row_list = []
-            for c in range(3):
-                e = tk.Entry(start_frame, width=3, font=("Arial", 12), justify="center")
-                e.grid(row=r, column=c, padx=2, pady=2)
-                row_list.append(e)
-            self.start_matrix.append(row_list)
+        # Box nhập ma trận
+        input_box = ttk.LabelFrame(left_frame, text="Nhập Ma Trận", padding=10)
+        input_box.pack(fill="x", pady=(0, 10))
+        
+        self.start_matrix = self.create_matrix(input_box, "Initial State:", 0)
+        self.goal_matrix = self.create_matrix(input_box, "Goal State:", 1, [[1,2,3], [4,5,6], [7,8,0]])
 
-        # GOAL
-        self.goal_matrix = []
-        goal_frame = tk.Frame(matrix_frame, bg="#E8F6F3")
-        goal_frame.grid(row=1, column=1, padx=10)
-        tk.Label(matrix_frame, text="Goal State:", font=("Arial", 12, "bold"), bg="#E8F6F3")\
-            .grid(row=0, column=1)
-        goal_default = [[1,2,3], [4,5,6], [7,8,0]]
-        for r in range(3):
-            row_list = []
-            for c in range(3):
-                e = tk.Entry(goal_frame, width=3, font=("Arial", 12), justify="center")
-                e.grid(row=r, column=c, padx=2, pady=2)
-                e.insert(0, str(goal_default[r][c]))
-                row_list.append(e)
-            self.goal_matrix.append(row_list)
-
-        # Status Table
-        tk.Label(left_frame, text="Algorithm Runs:", font=("Arial", 12, "bold"), bg="#E8F6F3")\
-            .pack(anchor="w", pady=(10, 0), padx=10)
-        self.status_table = ttk.Treeview(left_frame, columns=("Algorithm", "Time", "Expansions"), show="headings", height=5)
+        # Box kết quả
+        results_box = ttk.LabelFrame(left_frame, text="Kết Quả Thuật Toán", padding=10)
+        results_box.pack(fill="x", pady=(0, 10))
+        
+        self.status_table = ttk.Treeview(results_box, columns=("Algorithm", "Time", "Expansions"), show="headings", height=5)
         self.status_table.heading("Algorithm", text="Algorithm")
         self.status_table.heading("Time", text="Time (s)")
         self.status_table.heading("Expansions", text="Expansions")
         for col in ["Algorithm", "Time", "Expansions"]:
-            self.status_table.column(col, width=100, anchor="center")
+            self.status_table.column(col, width=110, anchor="center")
+            self.status_table.heading(col, command=lambda c=col: self.sort_treeview_column(c, False))
         self.status_table.pack(fill="x")
-        # Kích hoạt click để sắp xếp
-        for col in ("Algorithm", "Time", "Expansions"):
-            self.status_table.heading(col, text=col, command=lambda c=col: self.sort_treeview_column(c, False))
 
+        # Box điều khiển
+        controls_box = ttk.LabelFrame(left_frame, text="Điều Khiển", padding=10)
+        controls_box.pack(fill="x", pady=(0, 10))
 
-        # Controls
         self.algo_var = tk.StringVar(value="BFS")
-        tk.Label(left_frame, text="ALGORITHMS:", font=("Arial", 12, "bold"), bg="#E8F6F3")\
-            .pack(anchor="w", pady=(10, 5), padx=10)
-        algo_combobox = ttk.Combobox(left_frame, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*"], state="readonly", width=15)
-        algo_combobox.pack(anchor="w", pady=(0, 10), padx=5)
+        ttk.Label(controls_box, text="ALGORITHMS:").pack(anchor="w")
+        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Stepest-ascent Climbing"], state="readonly").pack(fill="x", pady=5)
 
-        btn_frame = tk.Frame(left_frame, bg="#E8F6F3")
-        btn_frame.pack(anchor="w")
-        tk.Button(btn_frame, text="LOAD", command=self.on_load_clicked, width=6).pack(side="left", padx=5)
-        tk.Button(btn_frame, text="RUN", command=self.on_run_clicked, width=6).pack(side="left", padx=5)
-        tk.Button(btn_frame, text="RANDOM", command=self.on_random_clicked, width=8).pack(side="left", padx=5)
-        tk.Button(btn_frame, text="CLEAR", command=self.clear_table, width=6).pack(side="left", padx=5)
+        btn_frame = ttk.Frame(controls_box)
+        btn_frame.pack(fill="x")
+        for text, cmd in [("LOAD", self.on_load_clicked), ("RUN", self.on_run_clicked), ("RANDOM", self.on_random_clicked), ("CLEAR", self.clear_table)]:
+            ttk.Button(btn_frame, text=text, command=cmd).pack(side="left", padx=2)
 
+        ttk.Label(controls_box, text="Speed:").pack(anchor="w", pady=(5, 0))
+        self.speed_scale = ttk.Scale(controls_box, from_=0.1, to=3.0, value=1.0, orient=tk.HORIZONTAL)
+        self.speed_scale.pack(fill="x")
 
-        tk.Label(left_frame, text="Speed:", font=("Arial", 12, "bold"), bg="#E8F6F3")\
-            .pack(anchor="w", pady=(10, 0), padx=10)
-        self.speed_scale = tk.Scale(left_frame, from_=0.1, to=3.0, resolution=0.1, orient=tk.HORIZONTAL, width=10, length=120)
-        self.speed_scale.set(1.0)
-        self.speed_scale.pack(anchor="w", pady=(0, 10), padx=5)
+        action_frame = ttk.Frame(controls_box)
+        action_frame.pack(fill="x", pady=5)
+        ttk.Button(action_frame, text="RESET", command=self.on_reset_clicked).pack(side="left", padx=2)
+        self.pause_button = ttk.Button(action_frame, text="PAUSE", command=self.on_pause_clicked)
+        self.pause_button.pack(side="left", padx=2)
 
-        pause_reset = tk.Frame(left_frame, bg="#E8F6F3")
-        pause_reset.pack(anchor="w", pady=(0,10))
-        tk.Button(pause_reset, text="RESET", command=self.on_reset_clicked, width=6).pack(side="left", padx=5)
-        self.pause_button = tk.Button(pause_reset, text="PAUSE", command=self.on_pause_clicked, width=6)
-        self.pause_button.pack(side="left", padx=5)
+        ttk.Button(controls_box, text="EXIT", command=self.on_exit_clicked).pack(side="left", pady=(5, 0))
+        ttk.Button(controls_box, text="EXPORT", command=self.export_to_file).pack(side="left", padx=5)
 
-        tk.Button(left_frame, text="EXIT", command=self.on_exit_clicked, width=6).pack(anchor="w", pady=(10,0), padx=5)
-        tk.Button(left_frame, text="EXPORT", command=self.export_to_file, width=8).pack(side="left", padx=5)
+    def create_matrix(self, parent, label, col, default=None):
+        ttk.Label(parent, text=label).grid(row=0, column=col, pady=(0, 5))
+        frame = ttk.Frame(parent)
+        frame.grid(row=1, column=col, padx=10)
+        matrix = []
+        for r in range(3):
+            row = []
+            for c in range(3):
+                e = ttk.Entry(frame, width=3, justify="center", font=("Arial", 12))
+                e.grid(row=r, column=c, padx=2, pady=2)
+                if default:
+                    e.insert(0, str(default[r][c]))
+                row.append(e)
+            matrix.append(row)
+        return matrix
 
+    def setup_center_frame(self, main_frame):
+        center_frame = ttk.Frame(main_frame)
+        center_frame.pack(side="left", expand=True, fill="both", padx=10)
 
-        # CENTER - Board & status
-        center_frame = tk.Frame(main_frame, bg="#E8F6F3")
-        center_frame.pack(side="left", expand=True, fill="both")
-
-        self.puzzle_inner = tk.Frame(center_frame, bg="#E8F6F3")
-        self.puzzle_inner.place(relx=0.5, rely=0.4, anchor="center")
-
+        board_box = ttk.LabelFrame(center_frame, text="Bảng Puzzle", padding=10)
+        board_box.pack(expand=True, fill="both")
+        
+        self.puzzle_inner = ttk.Frame(board_box)
+        self.puzzle_inner.place(relx=0.5, rely=0.5, anchor="center")
         self.tiles = []
         for r in range(3):
             row_tiles = []
             for c in range(3):
-                lbl = tk.Label(self.puzzle_inner, text="", font=("Arial", 20), width=4, height=2, borderwidth=2, relief="groove")
+                lbl = tk.Label(self.puzzle_inner, text="", font=("Arial", 20), width=4, height=2, bg="#FFFFFF", borderwidth=2, relief="groove")
                 lbl.grid(row=r, column=c, padx=2, pady=2)
                 row_tiles.append(lbl)
             self.tiles.append(row_tiles)
 
-        # Center status
-        self.status_box = tk.Text(center_frame, height=4, width=40, fg="blue", font=("Arial", 12))
+        self.status_box = tk.Text(center_frame, height=4, width=40, fg="blue", font=("Arial", 12), bg="#E8ECEF", relief="flat")
         self.status_box.pack(side="bottom", pady=10)
         self.status_box.config(state="disabled")
 
-        # RIGHT - Log
-        right_frame = tk.Frame(main_frame, bg="#E8F6F3")
-        right_frame.pack(side="left", fill="both", padx=10, pady=10)
-
-        self.log_box = ScrolledText(right_frame, width=40, height=20, font=("Arial", 12))
+    def setup_right_frame(self, main_frame):
+        right_frame = ttk.Frame(main_frame, width=300)
+        right_frame.pack(side="left", fill="both", padx=(10, 0))
+        
+        log_box = ttk.LabelFrame(right_frame, text="Log", padding=10)
+        log_box.pack(expand=True, fill="both")
+        self.log_box = ScrolledText(log_box, width=40, height=20, font=("Arial", 12), bg="#E8ECEF", relief="flat")
         self.log_box.pack(expand=True, fill="both")
         self.log_box.config(state="disabled")
 
     # ---------- Hàm sắp xếp cột trong bảng treeview ----------
     def sort_treeview_column(self, col, reverse):
         items = [(self.status_table.set(k, col), k) for k in self.status_table.get_children('')]
-
-        # Nếu cột là số thì ép kiểu để sắp đúng
         if col in ("Time", "Expansions"):
             items.sort(key=lambda t: float(t[0]), reverse=reverse)
         else:
             items.sort(reverse=reverse)
-
-        # Sắp xếp lại thứ tự
         for index, (val, k) in enumerate(items):
             self.status_table.move(k, '', index)
-
-        # Đảo chiều sắp xếp lần sau
         self.status_table.heading(col, command=lambda: self.sort_treeview_column(col, not reverse))
 
     def clear_table(self):
         for item in self.status_table.get_children():
             self.status_table.delete(item)
 
-    # Hàm xuất file csv
     def export_to_file(self):
         file_name = "algorithm_results.csv"
         try:
@@ -359,7 +422,6 @@ class PuzzleApp(tk.Tk):
         except Exception as e:
             self.set_status(f"Lỗi khi xuất file: {e}")
 
-    # ---------- Hàm đọc ma trận 3x3 ----------
     def read_3x3_matrix(self, matrix_3x3):
         vals = []
         for r in range(3):
@@ -393,17 +455,15 @@ class PuzzleApp(tk.Tk):
         threading.Thread(target=self.run_search).start()
     
     def on_reset_clicked(self):
-        for matrix in (self.start_matrix, self.goal_matrix):
-            for row in matrix:
-                for e in row:
-                    e.delete(0, tk.END)
+        for row in self.start_matrix:
+            for e in row:
+                e.delete(0, tk.END)
         for row in self.tiles:
             for lbl in row:
                 lbl.config(text="")
         self.set_status("Đã RESET.")
     
     def on_random_clicked(self):
-        # Random chỉ thay đổi ma trận START
         arr = list(range(9))
         def is_solvable(state_list):
             inv = 0
@@ -428,7 +488,7 @@ class PuzzleApp(tk.Tk):
     
     def on_pause_clicked(self):
         if not self.playing:
-            self.set_status("Không có mô phỏng nào đang chạy.")
+            self.set_status("Không có mô phỏng正在 chạy.")
             return
         self.paused = not self.paused
         self.pause_button.config(text="RESUME" if self.paused else "PAUSE")
@@ -457,6 +517,10 @@ class PuzzleApp(tk.Tk):
             path, expansions = a_star(self.start_state, self.goal_state)
         elif algo == "IDA*":
             path, expansions = ida_star(self.start_state, self.goal_state)
+        elif algo == "Simple Hill Climbing":
+            path, expansions = simple_hill_climbing(self.start_state, self.goal_state)
+        elif algo == "Stepest-ascent Climbing":
+            path, expansions = stepest_ascent_hill_climbing(self.start_state, self.goal_state)
         else:
             path, expansions = None, 0
     
@@ -471,16 +535,10 @@ class PuzzleApp(tk.Tk):
             num_steps = len(path) - 1
             status_msg = f"Tìm thấy {num_steps} bước.\nThời gian: {duration:.4f}s\nExpansions: {expansions}"
             self.set_status(status_msg)
-
-            # Ghi kết quả vào bảng status (Treeview)
             self.status_table.insert("", "end", values=(self.algo_var.get(), f"{duration:.4f}", expansions))
-
-            # Ghi log
             self.log_box.config(state="normal")
             self.log_box.insert("1.0", status_msg + "\n")
             self.log_box.config(state="disabled")
-
-            # Bắt đầu mô phỏng
             self.animate_solution()
     
     def animate_solution(self):
@@ -517,7 +575,8 @@ class PuzzleApp(tk.Tk):
             row_str = " ".join(str(x) if x != 0 else "_" for x in row)
             lines.append(row_str)
         return "\n".join(lines)
-    
+ 
+
 if __name__ == "__main__":
     app = PuzzleApp()
     app.mainloop()
