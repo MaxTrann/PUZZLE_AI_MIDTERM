@@ -13,7 +13,7 @@ import csv
 # nhóm 3: Local search -> Hill Climbing:
                         # Simple hill Climbing (leo đồi đơn giản)
 
-# ============ Các hàm giải thuật (không đổi) ============
+# ============ Các hàm giải thuật  ============
 def parse_puzzle_input(input_str):
     parts = input_str.strip().split(',')
     return tuple(int(x) for x in parts)
@@ -73,7 +73,7 @@ def dfs(start, goal):
 
 def ucs(start, goal):
     pq = []
-    heapq.heappush(pq, (0, start, [start]))
+    heapq.heappush(pq, (0, start, [start]))  # (cost, state, path)
     visited = set()
     expansions = 0
     while pq:
@@ -115,7 +115,7 @@ def greedy_search(start, goal):
                 visited.add(neighbor)
                 h_neighbor = manhattan_distance(neighbor, goal)
                 heapq.heappush(heap, (h_neighbor, neighbor, path + [neighbor]))
-    return [], expansions
+    return None, expansions 
 
 def iddfs(start, goal, max_depth=50):
     expansions = [0]
@@ -209,6 +209,7 @@ def simple_hill_climbing(start, goal):
                 dist += abs(row_s - row_g) + abs(col_s - col_g)
         return dist
     current_state = start
+    path = [start]  # Thêm path để ghi lại đường đi
     expansions = 0
     while True:
         expansions += 1
@@ -221,11 +222,12 @@ def simple_hill_climbing(start, goal):
         if next_state is None:
             break
         current_state = next_state
+        path.append(current_state)  # Ghi lại trạng thái mới
         if current_state == goal:
-            return current_state, expansions
+            return path, expansions  # Trả về path thay vì chỉ current_state
     return None, expansions
 
-def stepest_ascent_hill_climbing(start, goal):
+def steepest_ascent_hill_climbing(start, goal):
     def evaluate(state):
         dist = 0
         for i, val in enumerate(state):
@@ -237,7 +239,7 @@ def stepest_ascent_hill_climbing(start, goal):
         return dist
     
     current_state = start
-
+    path = [start]  # Thêm path để ghi lại đường đi
     expansions = 0
 
     while True:
@@ -252,13 +254,12 @@ def stepest_ascent_hill_climbing(start, goal):
                 best_score = score
                 best_neighbor = neighbor
 
-        if best_score is None or best_score >= evaluate(current_state):
+        if best_neighbor is None or best_score >= evaluate(current_state):
             break
         current_state = best_neighbor
-
+        path.append(current_state)  # Ghi lại trạng thái mới
         if current_state == goal:
-            return current_state, expansions
-
+            return path, expansions  # Trả về path thay vì chỉ current_state
     return None, expansions
 
 # ============ 8-Puzzle App =============
@@ -275,6 +276,8 @@ class PuzzleApp(tk.Tk):
         self.current_step = 0
         self.playing = False
         self.paused = False
+        self.is_running = False  # Theo dõi trạng thái chạy
+        self.current_thread = None  # Lưu thread hiện tại
 
         # Thiết lập style cho giao diện
         self.style = ttk.Style()
@@ -324,12 +327,17 @@ class PuzzleApp(tk.Tk):
 
         self.algo_var = tk.StringVar(value="BFS")
         ttk.Label(controls_box, text="ALGORITHMS:").pack(anchor="w")
-        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Stepest-ascent Climbing"], state="readonly").pack(fill="x", pady=5)
+        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Steepest-ascent Climbing"], state="readonly").pack(fill="x", pady=5)
 
         btn_frame = ttk.Frame(controls_box)
         btn_frame.pack(fill="x")
-        for text, cmd in [("LOAD", self.on_load_clicked), ("RUN", self.on_run_clicked), ("RANDOM", self.on_random_clicked), ("CLEAR", self.clear_table)]:
-            ttk.Button(btn_frame, text=text, command=cmd).pack(side="left", padx=2)
+        # Khai báo và lưu tham chiếu đến các nút LOAD và RUN
+        self.load_button = ttk.Button(btn_frame, text="LOAD", command=self.on_load_clicked)
+        self.load_button.pack(side="left", padx=2)
+        self.run_button = ttk.Button(btn_frame, text="RUN", command=self.on_run_clicked)
+        self.run_button.pack(side="left", padx=2)
+        ttk.Button(btn_frame, text="RANDOM", command=self.on_random_clicked).pack(side="left", padx=2)
+        ttk.Button(btn_frame, text="CLEAR", command=self.clear_table).pack(side="left", padx=2)
 
         ttk.Label(controls_box, text="Speed:").pack(anchor="w", pady=(5, 0))
         self.speed_scale = ttk.Scale(controls_box, from_=0.1, to=3.0, value=1.0, orient=tk.HORIZONTAL)
@@ -433,6 +441,9 @@ class PuzzleApp(tk.Tk):
         return tuple(vals)
     
     def on_load_clicked(self):
+        if self.is_running:  # Nếu thuật toán đang chạy, không cho phép LOAD
+            self.set_status("Không thể LOAD khi thuật toán đang chạy. Vui lòng RESET hoặc chờ hoàn tất.")
+            return
         try:
             self.start_state = self.read_3x3_matrix(self.start_matrix)
             self.goal_state = self.read_3x3_matrix(self.goal_matrix)
@@ -443,36 +454,58 @@ class PuzzleApp(tk.Tk):
         self.set_status("Đã LOAD ma trận START và GOAL.")
     
     def on_run_clicked(self):
+        if self.is_running:
+            self.set_status("Không thể RUN khi thuật toán đang chạy. Vui lòng RESET hoặc chờ hoàn tất.")
+            return
         if not self.start_state or not self.goal_state:
             self.set_status("Hãy LOAD trước khi RUN.")
             return
         self.solution_path = []
         self.current_step = 0
         self.playing = True
+        self.is_running = True
+        self.load_button.config(state="disabled")  # Vô hiệu hóa nút LOAD
+        self.run_button.config(state="disabled")  # Vô hiệu hóa nút RUN
         self.log_box.config(state="normal")
         self.log_box.delete("1.0", tk.END)
         self.log_box.config(state="disabled")
-        threading.Thread(target=self.run_search).start()
+        self.current_thread = threading.Thread(target=self.run_search)
+        self.current_thread.start()
     
     def on_reset_clicked(self):
+        self.playing = False
+        self.paused = False
+        self.is_running = False
+        if self.current_thread and self.current_thread.is_alive():
+            self.current_thread = None
+        self.load_button.config(state="normal")
+        self.run_button.config(state="normal")
+        self.current_step = 0
+        self.solution_path = []
         for row in self.start_matrix:
             for e in row:
                 e.delete(0, tk.END)
         for row in self.tiles:
             for lbl in row:
                 lbl.config(text="")
+        # Xóa nội dung bảng so sánh
+        self.clear_table()
+        # Xóa nội dung trong Log box
+        self.log_box.config(state="normal")
+        self.log_box.delete("1.0", tk.END)
+        self.log_box.config(state="disabled")
         self.set_status("Đã RESET.")
     
     def on_random_clicked(self):
         arr = list(range(9))
         def is_solvable(state_list):
-            inv = 0
-            a = [x for x in state_list if x != 0]
-            for i in range(len(a)):
-                for j in range(i+1, len(a)):
-                    if a[i] > a[j]:
-                        inv += 1
-            return inv % 2 == 0
+                inv = 0
+                a = [x for x in state_list if x != 0]
+                for i in range(len(a)):
+                    for j in range(i+1, len(a)):
+                        if a[i] > a[j]:
+                            inv += 1
+                return inv % 2 == 0
         while True:
             random.shuffle(arr)
             if is_solvable(arr):
@@ -484,11 +517,13 @@ class PuzzleApp(tk.Tk):
                 self.start_matrix[r][c].delete(0, tk.END)
                 self.start_matrix[r][c].insert(0, str(arr[index]))
         self.display_state(self.start_state)
+        # Xóa bảng Kết Quả Thuật Toán
+        self.clear_table()
         self.set_status("Đã RANDOM ma trận START.")
     
     def on_pause_clicked(self):
         if not self.playing:
-            self.set_status("Không có mô phỏng正在 chạy.")
+            self.set_status("Không có mô phỏng chạy.")
             return
         self.paused = not self.paused
         self.pause_button.config(text="RESUME" if self.paused else "PAUSE")
@@ -519,8 +554,8 @@ class PuzzleApp(tk.Tk):
             path, expansions = ida_star(self.start_state, self.goal_state)
         elif algo == "Simple Hill Climbing":
             path, expansions = simple_hill_climbing(self.start_state, self.goal_state)
-        elif algo == "Stepest-ascent Climbing":
-            path, expansions = stepest_ascent_hill_climbing(self.start_state, self.goal_state)
+        elif algo == "Steepest-ascent Climbing":
+            path, expansions = steepest_ascent_hill_climbing(self.start_state, self.goal_state)
         else:
             path, expansions = None, 0
     
@@ -529,6 +564,9 @@ class PuzzleApp(tk.Tk):
     
         if not path:
             self.playing = False
+            self.is_running = False
+            self.load_button.config(state="normal")  # Kích hoạt lại nút LOAD
+            self.run_button.config(state="normal")  # Kích hoạt lại nút RUN
             self.set_status("Không tìm thấy lời giải.")
         else:
             self.solution_path = path
@@ -555,6 +593,9 @@ class PuzzleApp(tk.Tk):
             self.after(int(delay * 1000), self.animate_solution)
         else:
             self.playing = False
+            self.is_running = False
+            self.load_button.config(state="normal")  # Kích hoạt lại nút LOAD
+            self.run_button.config(state="normal")  # Kích hoạt lại nút RUN
             self.set_status("Đã mô phỏng xong.")
     
     def display_state(self, state):
