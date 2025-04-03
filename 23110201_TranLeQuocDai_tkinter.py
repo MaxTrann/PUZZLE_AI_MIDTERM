@@ -272,7 +272,7 @@ def steepest_ascent_hill_climbing(start, goal):
 class PuzzleApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("8-Puzzle - Nhập START & GOAL dạng ma trận 3x3")
+        self.title("8-Puzzle - Trần Lê Quốc Đại - 23110201")
         self.geometry("1200x650")
         self.configure(bg="#F0F4F8")
 
