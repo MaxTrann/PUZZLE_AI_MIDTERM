@@ -7,6 +7,7 @@ import random
 from tkinter.scrolledtext import ScrolledText
 import time
 import csv
+import math
 
 # nhóm 1: bfs, dfs, iddfs, ucs -> tìm kiếm không dùng heuristic
 # nhóm 2: greedy, a*, ida* -> tìm kiếm dùng heuristic
@@ -268,6 +269,132 @@ def steepest_ascent_hill_climbing(start, goal):
             return path, expansions  # Trả về path thay vì chỉ current_state
     return None, expansions
 
+def stochastic_hill_climbing(start, goal):
+    def evaluate(state):
+        # Hàm đánh giá: Khoảng cách Manhattan
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:  # Bỏ qua ô trống
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+
+    current_state = start
+    path = [start]  # Ghi lại đường đi
+    expansions = 0
+
+    while True:
+        expansions += 1
+        neighbors = get_neighbors(current_state)
+        better_neighbors = []
+
+        # Tìm các trạng thái lân cận tốt hơn
+        for neighbor in neighbors:
+            if evaluate(neighbor) < evaluate(current_state):
+                better_neighbors.append(neighbor)
+
+        if not better_neighbors:  # Không có trạng thái nào tốt hơn
+            break
+
+        # Chọn ngẫu nhiên một trạng thái tốt hơn
+        current_state = random.choice(better_neighbors)
+        path.append(current_state)
+
+        if current_state == goal:  # Đạt trạng thái mục tiêu
+            return path, expansions
+
+    return None, expansions  # Không tìm thấy lời giải
+
+def simulated_annealing(start, goal, initial_temp=1000, cooling_rate=0.99, min_temp=0.1):
+    def evaluate(state):
+        # Hàm đánh giá: Khoảng cách Manhattan
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:  # Bỏ qua ô trống
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+
+    current_state = start
+    current_eval = evaluate(current_state)
+    path = [start]  # Ghi lại đường đi
+    expansions = 0
+    temperature = initial_temp
+
+    while temperature > min_temp:
+        expansions += 1
+        neighbors = get_neighbors(current_state)
+        if not neighbors:
+            break
+
+        # Chọn ngẫu nhiên một trạng thái lân cận
+        next_state = random.choice(neighbors)
+        next_eval = evaluate(next_state)
+
+        # Tính toán sự thay đổi giá trị heuristic
+        delta_eval = next_eval - current_eval
+
+        # Quyết định chấp nhận trạng thái mới
+        if delta_eval < 0 or math.exp(-delta_eval / temperature) > random.random():
+            current_state = next_state
+            current_eval = next_eval
+            path.append(current_state)
+
+        # Giảm nhiệt độ
+        temperature *= cooling_rate
+
+        # Kiểm tra nếu đạt trạng thái mục tiêu
+        if current_state == goal:
+            return path, expansions
+
+    return None, expansions  # Không tìm thấy lời giải
+
+def beam_search(start, goal, beam_width=2):
+    def evaluate(state):
+        # Hàm đánh giá: Khoảng cách Manhattan
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:  # Bỏ qua ô trống
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+
+    # Khởi tạo
+    current_states = [(start, [start])]  # Danh sách trạng thái hiện tại (state, path)
+    expansions = 0
+
+    while current_states:
+        expansions += 1
+        all_neighbors = []
+
+        # Sinh tất cả các trạng thái lân cận
+        for state, path in current_states:
+            for neighbor in get_neighbors(state):
+                if neighbor not in path:  # Tránh lặp lại trạng thái trong đường đi
+                    all_neighbors.append((neighbor, path + [neighbor]))
+
+        # Nếu không có trạng thái lân cận, dừng lại
+        if not all_neighbors:
+            break
+
+        # Sắp xếp các trạng thái lân cận theo giá trị heuristic
+        all_neighbors.sort(key=lambda x: evaluate(x[0]))
+
+        # Giữ lại beam_width trạng thái tốt nhất
+        current_states = all_neighbors[:beam_width]
+
+        # Kiểm tra nếu tìm thấy trạng thái mục tiêu
+        for state, path in current_states:
+            if state == goal:
+                return path, expansions
+
+    return None, expansions  # Không tìm thấy lời giải
 # ============ 8-Puzzle App =============
 class PuzzleApp(tk.Tk):
     def __init__(self):
@@ -309,7 +436,7 @@ class PuzzleApp(tk.Tk):
 
         # Box nhập ma trận
         input_box = ttk.LabelFrame(left_frame, text="Nhập Ma Trận", padding=10)
-        input_box.pack(fill="x", pady=(0, 10))
+        input_box.pack(fill="both", pady=(0, 10)) # fill là both để khung ko bị nhỏ
         
         self.start_matrix = self.create_matrix(input_box, "Initial State:", 0)
         self.goal_matrix = self.create_matrix(input_box, "Goal State:", 1, [[1,2,3], [4,5,6], [7,8,0]])
@@ -333,7 +460,7 @@ class PuzzleApp(tk.Tk):
 
         self.algo_var = tk.StringVar(value="BFS")
         ttk.Label(controls_box, text="ALGORITHMS:").pack(anchor="w")
-        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Steepest-ascent Climbing"], state="readonly").pack(fill="x", pady=5)
+        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Steepest-ascent Climbing", "Stochastic Hill Climbing", "Simulated Annealing", "Beam Search"], state="readonly").pack(fill="x", pady=5)
 
         btn_frame = ttk.Frame(controls_box)
         btn_frame.pack(fill="x")
@@ -359,9 +486,12 @@ class PuzzleApp(tk.Tk):
         ttk.Button(controls_box, text="EXPORT", command=self.export_to_file).pack(side="left", padx=5)
 
     def create_matrix(self, parent, label, col, default=None):
+        # Thêm nhãn cho ma trận
         ttk.Label(parent, text=label).grid(row=0, column=col, pady=(0, 5))
+
+        # Tạo khung chứa ma trận
         frame = ttk.Frame(parent)
-        frame.grid(row=1, column=col, padx=10)
+        frame.grid(row=1, column=col, padx=35, pady=5, sticky="nsew") # Thêm sticky để căn giữa
         matrix = []
         for r in range(3):
             row = []
@@ -525,6 +655,12 @@ class PuzzleApp(tk.Tk):
         self.display_state(self.start_state)
         # Xóa bảng Kết Quả Thuật Toán
         self.clear_table()
+
+        # Xóa nội dung trong Log Box
+        self.log_box.config(state="normal")
+        self.log_box.delete("1.0", tk.END)
+        self.log_box.config(state="disabled")
+
         self.set_status("Đã RANDOM ma trận START.")
     
     def on_pause_clicked(self):
@@ -562,6 +698,12 @@ class PuzzleApp(tk.Tk):
             path, expansions = simple_hill_climbing(self.start_state, self.goal_state)
         elif algo == "Steepest-ascent Climbing":
             path, expansions = steepest_ascent_hill_climbing(self.start_state, self.goal_state)
+        elif algo == "Stochastic Hill Climbing":
+            path, expansions = stochastic_hill_climbing(self.start_state, self.goal_state)
+        elif algo == "Simulated Annealing":
+            path, expansions = simulated_annealing(self.start_state, self.goal_state)
+        elif algo == "Beam Search":
+            path, expansions = beam_search(self.start_state, self.goal_state, beam_width=2)
         else:
             path, expansions = None, 0
     
