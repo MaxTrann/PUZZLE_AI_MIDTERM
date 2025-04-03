@@ -1,19 +1,28 @@
-## Mô phỏng các thuật toán
+## 📌 Mô phỏng các thuật toán tìm kiếm 8-Puzzle
 
-### 📌 BFS
-![BFS](gif/bfs.gif)
+### 🔍 BFS
+![BFS](gif/BFS.gif)
 
-### 📌 DFS
-![DFS](gif/dfs.gif)
+### 🔍 DFS
+![DFS](gif/DFS.gif)
 
-### 📌 A*
-![A*](gif/astar.gif)
+### 🔍 UCS
+![UCS](gif/UCS.gif)
 
-### 📌 IDDFS
-![IDDFS](gif/iddfs.gif)
+### 🔍 IDDFS
+![IDDFS](gif/IDDFS.gif)
 
-### 📌 Greedy
-![Greedy](gif/greedy.gif)
+### 🔍 A*
+![A*](gif/A_STAR.gif)
 
-### 📌 Hill Climbing
-![Hill Climbing](gif/hill_climbing.gif)
+### 🔍 IDA*
+![IDA*](gif/IDA_STAR.gif)
+
+### 🔍 Greedy Best First Search
+![Greedy](gif/GREEDY.gif)
+
+### 🔍 Simple Hill Climbing
+![Simple Hill Climbing](gif/SIMPLE_CLIMBING.gif)
+
+### 🔍 Steepest Ascent Hill Climbing
+![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
