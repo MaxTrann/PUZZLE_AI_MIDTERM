@@ -56,20 +56,26 @@ def bfs(start, goal):
                 queue
     return None, expansions
 
-def dfs(start, goal):
-    stack = [(start, [start])]
-    visited = set([start])
-    expansions = 0
-    while stack:
-        current_state, path = stack.pop()
+def dfs(start, goal, depth_limit=50):
+    def dfs_recursive(state, path, visited, depth, expansions):
+        if depth > depth_limit:
+            return None, expansions
         expansions += 1
-        if current_state == goal:
+        if state == goal:
             return path, expansions
-        for neighbor in get_neighbors(current_state):
+        if state in visited:
+            return None, expansions
+        
+
+        visited.add(state)
+        for neighbor in get_neighbors(state):
             if neighbor not in visited:
-                visited.add(neighbor)
-                stack.append((neighbor, path + [neighbor]))
-    return None, expansions
+                result, expansions = dfs_recursive(neighbor, path + [neighbor], visited, depth + 1, expansions)
+                if result:
+                    return result, expansions
+        return None, expansions
+
+    return dfs_recursive(start, [start], set(), 0, 0)
 
 def ucs(start, goal):
     pq = []
