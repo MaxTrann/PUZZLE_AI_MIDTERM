@@ -51,13 +51,6 @@
 - Dự án phục vụ học phần **Trí Tuệ Nhân Tạo - Kỳ 2 Năm 2**
 
 ---
-
-## 🚀 Cách chạy:
-
-```bash
-python 23110201_TranLeQuocDai_tkinter.py
-
-
 ## 📌 Mô phỏng các thuật toán tìm kiếm 8-Puzzle
 ### 🔍 BFS
 ![BFS](gif/BFS.gif)
