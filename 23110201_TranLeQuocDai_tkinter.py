@@ -1,3 +1,4 @@
+import itertools
 import tkinter as tk
 from tkinter import ttk
 from collections import deque
@@ -395,6 +396,191 @@ def beam_search(start, goal, beam_width=2):
                 return path, expansions
 
     return None, expansions  # Không tìm thấy lời giải
+
+def and_or_search(start, goal, max_depth=50):
+    expansions = 0
+
+    def goal_test(state):
+        return state == goal
+
+    def results(state, action):
+        return [action]
+
+    def or_search(state, path, depth):
+        nonlocal expansions
+        if goal_test(state):
+            return [state]
+        if state in path or depth > max_depth:
+            return None
+        expansions += 1
+        for neighbor in get_neighbors(state):
+            if neighbor not in path:
+                plan = and_search(results(state, neighbor), path + [state], depth + 1)
+                if plan:
+                    return [state] + plan
+        return None
+
+    def and_search(states, path, depth):
+        full_plan = []
+        for s in states:
+            plan = or_search(s, path, depth)
+            if plan is None:
+                return None
+            full_plan.extend(plan[1:] if full_plan else plan)
+        return full_plan
+
+    plan = or_search(start, [], 0)
+    return (plan, expansions) if plan else (None, expansions)
+def genetic_algorithm(start, goal, population_size=100, generations=500, mutation_rate=0.1, log_callback=None):
+    import random
+
+    def fitness(state):
+        dist = 0
+        for i, val in enumerate(state):
+            if val != 0:
+                goal_index = goal.index(val)
+                row_s, col_s = divmod(i, 3)
+                row_g, col_g = divmod(goal_index, 3)
+                dist += abs(row_s - row_g) + abs(col_s - col_g)
+        return dist
+
+    def crossover(p1, p2):
+        child = [-1] * 9
+        start, end = sorted(random.sample(range(9), 2))
+        child[start:end+1] = p1[start:end+1]
+        pointer = 0
+        for i in range(9):
+            if child[i] == -1:
+                while p2[pointer] in child:
+                    pointer += 1
+                child[i] = p2[pointer]
+        return tuple(child)
+
+    def mutate(state):
+        s = list(state)
+        i, j = random.sample([x for x in range(9) if s[x] != 0], 2)
+        s[i], s[j] = s[j], s[i]
+        return tuple(s)
+
+    def is_solvable(state):
+        inv = 0
+        arr = [x for x in state if x != 0]
+        for i in range(len(arr)):
+            for j in range(i + 1, len(arr)):
+                if arr[i] > arr[j]:
+                    inv += 1
+        return inv % 2 == 0
+
+    # --- STEP 1: Initialize Population ---
+    population = []
+    while len(population) < population_size:
+        shuffled = list(start)
+        random.shuffle(shuffled)
+        candidate = tuple(shuffled)
+        if is_solvable(candidate):
+            population.append(candidate)
+
+    expansions = 0
+
+    # --- STEP 2 to End: Loop over generations ---
+    for gen in range(generations):
+        # Evaluate fitness
+        population.sort(key=lambda s: fitness(s))
+        best = population[0]
+        best_fitness = fitness(best)
+
+        if log_callback:
+            log_callback(f"[GA] Thế hệ {gen+1} – Cá thể tốt nhất: {best_fitness}")
+
+        # Solution found
+        if best_fitness == 0:
+            return [start, best], expansions
+
+        # Mate individuals (tạo thế hệ mới)
+        next_gen = population[:10]  # elitism: giữ top 10
+
+        while len(next_gen) < population_size:
+            p1, p2 = random.sample(population[:50], 2)
+            child = crossover(p1, p2)
+            if random.random() < mutation_rate:
+                child = mutate(child)
+            if is_solvable(child):
+                next_gen.append(child)
+            expansions += 1
+
+        population = next_gen  # Cập nhật quần thể
+
+    return None, expansions  # Không tìm thấy lời giải
+
+def sensorless_search(goal, initial_states=None):
+    from collections import deque
+
+    all_states = set(itertools.permutations(range(9)))
+
+    # Nếu không truyền initial_states thì mặc định là toàn bộ
+    if initial_states is None:
+        possible_states = all_states
+    else:
+        possible_states = set(initial_states)
+
+    queue = deque([(possible_states, [])])
+    visited = set()
+    expansions = 0
+
+    while queue:
+        current_states, path = queue.popleft()
+        frozen = frozenset(current_states)
+
+        if frozen in visited:
+            continue
+        visited.add(frozen)
+        expansions += 1
+
+        if len(current_states) == 1 and goal in current_states:
+            return path, expansions
+
+        for action in ['up', 'down', 'left', 'right']:
+            new_states = set()
+            for state in current_states:
+                zero_index = state.index(0)
+                row, col = divmod(zero_index, 3)
+                moves = {
+                    'up':    (-1, 0),
+                    'down':  ( 1, 0),
+                    'left':  ( 0, -1),
+                    'right': ( 0,  1)
+                }
+                dr, dc = moves[action]
+                new_row = row + dr
+                new_col = col + dc
+                if 0 <= new_row < 3 and 0 <= new_col < 3:
+                    new_index = new_row * 3 + new_col
+                    new_state = list(state)
+                    new_state[zero_index], new_state[new_index] = new_state[new_index], new_state[zero_index]
+                    new_states.add(tuple(new_state))
+            if new_states:
+                queue.append((new_states, path + [action]))
+
+    return None, expansions
+
+def apply_action(state, action):
+        zero_index = state.index(0)
+        row, col = divmod(zero_index, 3)
+        moves = {
+            'up':    (-1, 0),
+            'down':  ( 1, 0),
+            'left':  ( 0, -1),
+            'right': ( 0,  1)
+        }
+        dr, dc = moves[action]
+        new_row, new_col = row + dr, col + dc
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_index = new_row * 3 + new_col
+            new_state = list(state)
+            new_state[zero_index], new_state[new_index] = new_state[new_index], new_state[zero_index]
+            return tuple(new_state)
+        return state  # nếu không hợp lệ, trả về nguyên 
+
 # ============ 8-Puzzle App =============
 class PuzzleApp(tk.Tk):
     def __init__(self):
@@ -460,7 +646,29 @@ class PuzzleApp(tk.Tk):
 
         self.algo_var = tk.StringVar(value="BFS")
         ttk.Label(controls_box, text="ALGORITHMS:").pack(anchor="w")
-        ttk.Combobox(controls_box, textvariable=self.algo_var, values=["BFS", "DFS", "UCS", "Greedy", "IDDFS", "A*", "IDA*", "Simple Hill Climbing", "Steepest-ascent Climbing", "Stochastic Hill Climbing", "Simulated Annealing", "Beam Search"], state="readonly").pack(fill="x", pady=5)
+        ttk.Combobox(controls_box, textvariable=self.algo_var, values=[
+            "--- Uninformed Search ---",
+            "BFS",
+            "DFS",
+            "UCS",
+            "IDDFS",
+            "--- Informed Search ---",
+            "Greedy",
+            "A*",
+            "IDA*",
+            "Beam Search",
+            "--- Local Search ---",
+            "Simple Hill Climbing",
+            "Steepest-ascent Climbing",
+            "Stochastic Hill Climbing",
+            "Simulated Annealing",
+            "--- Evolutionary ---",
+            "Genetic Algorithm",
+            "--- Other ---",
+            "AND-OR Search", 
+            "Sensorless Search"
+        ], state="readonly").pack(fill="x", pady=5)
+
 
         btn_frame = ttk.Frame(controls_box)
         btn_frame.pack(fill="x")
@@ -678,6 +886,14 @@ class PuzzleApp(tk.Tk):
     def run_search(self):
         self.set_status("Đang tìm lời giải...")
         algo = self.algo_var.get()
+
+        if algo.startswith("---"):
+            self.set_status("Vui lòng chọn một thuật toán hợp lệ.")
+            self.is_running = False
+            self.load_button.config(state="normal")
+            self.run_button.config(state="normal")
+            return
+
         start_time = time.perf_counter()
     
         if algo == "BFS":
@@ -704,6 +920,21 @@ class PuzzleApp(tk.Tk):
             path, expansions = simulated_annealing(self.start_state, self.goal_state)
         elif algo == "Beam Search":
             path, expansions = beam_search(self.start_state, self.goal_state, beam_width=2)
+        elif algo == "AND-OR Search":
+            path, expansions = and_or_search(self.start_state, self.goal_state)
+        elif algo == "Genetic Algorithm":
+            path, expansions = genetic_algorithm(self.start_state, self.goal_state, log_callback=self.log_to_gui)
+        elif algo == "Sensorless Search":
+            start_set = {self.start_state}
+            actions, expansions = sensorless_search(self.goal_state, initial_states=start_set)
+            if actions:
+                path = [self.start_state]
+                current = self.start_state
+                for move in actions:
+                    current = apply_action(current, move)  # <- cần viết hàm này
+                    path.append(current)
+            else:
+                path = None
         else:
             path, expansions = None, 0
     
@@ -727,6 +958,8 @@ class PuzzleApp(tk.Tk):
             self.log_box.config(state="disabled")
             self.animate_solution()
     
+    
+
     def animate_solution(self):
         if not self.playing or self.paused:
             return
@@ -745,7 +978,12 @@ class PuzzleApp(tk.Tk):
             self.load_button.config(state="normal")  # Kích hoạt lại nút LOAD
             self.run_button.config(state="normal")  # Kích hoạt lại nút RUN
             self.set_status("Đã mô phỏng xong.")
-    
+    def log_to_gui(self, message):
+        self.log_box.config(state="normal")         # MỞ ghi log
+        self.log_box.insert(tk.END, message + '\n') # Ghi log
+        self.log_box.see(tk.END)                    # Auto scroll
+        self.log_box.config(state="disabled")   
+
     def display_state(self, state):
         for i, val in enumerate(state):
             r, c = divmod(i, 3)
