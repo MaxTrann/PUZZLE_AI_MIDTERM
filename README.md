@@ -30,7 +30,7 @@
 
 - **Khác:**
   - AND-OR Search – Tìm kiếm điều kiện rẽ nhánh
-  - *(Tuỳ chọn)* Genetic Algorithm – Giải thuật di truyền (nếu thêm)
+  - Genetic Algorithm – Giải thuật di truyền
 
 ---
 
