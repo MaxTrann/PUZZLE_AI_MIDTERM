@@ -26,3 +26,6 @@
 
 ### 🔍 Steepest Ascent Hill Climbing
 ![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
+
+### 🔍 BEAM SEARCH
+![Beam Search](gif/BEAM_SEARCH.gif)
