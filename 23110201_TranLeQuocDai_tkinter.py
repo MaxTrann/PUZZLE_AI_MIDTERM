@@ -581,6 +581,155 @@ def apply_action(state, action):
             return tuple(new_state)
         return state  # nếu không hợp lệ, trả về nguyên 
 
+
+def belief_bfs(start_belief, goal_state):
+    from collections import deque
+
+    def is_goal_belief(belief):
+        return all(state == goal_state for state in belief)
+
+    def apply_action(state, action):
+        state = list(state)
+        zero = state.index(0)
+        r, c = divmod(zero, 3)
+        moves = {
+            'up': (-1, 0), 'down': (1, 0), 'left': (0, -1), 'right': (0, 1)
+        }
+        dr, dc = moves[action]
+        nr, nc = r + dr, c + dc
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            new_idx = nr * 3 + nc
+            state[zero], state[new_idx] = state[new_idx], state[zero]
+            return tuple(state)
+        return None
+
+    def get_neighbors(belief):
+        neighbors = []
+        for action in ['up', 'down', 'left', 'right']:
+            new_belief = set()
+            for state in belief:
+                next_state = apply_action(state, action)
+                if next_state:
+                    new_belief.add(next_state)
+            if new_belief:
+                neighbors.append((frozenset(new_belief), action))
+        return neighbors
+
+    queue = deque([(frozenset(start_belief), [])])
+    visited = set()
+    expansions = 0
+
+    while queue:
+        belief, path = queue.popleft()
+        if belief in visited:
+            continue
+        visited.add(belief)
+        expansions += 1
+
+        if is_goal_belief(belief):
+            return path, expansions
+
+        if len(belief) == 1:
+            # Hội tụ về 1 trạng thái duy nhất
+            return path, expansions
+
+        for new_belief, action in get_neighbors(belief):
+            if new_belief not in visited:
+                queue.append((new_belief, path + [action]))
+
+    return None, expansions
+
+# Thuật toán quay lui (Backtracking Search Algorithm)
+def backtracking_search(start, goal, max_depth = 50):
+    expansions = [0]
+    visited = set()
+    def is_complete(state):
+        return state == goal
+
+    def is_consistent(state, path):
+        return state not in path
+
+    def recursive_backtracking(assignment, depth):
+        expansions[0] += 1
+        current = assignment[-1]
+        if depth > max_depth:
+            return None
+        
+        if is_complete(assignment[-1]):
+            return assignment
+
+        for neighbor in get_neighbors(assignment[-1]):
+            if is_consistent(neighbor, assignment):
+                visited.add(neighbor)
+                assignment.append(neighbor)
+
+                result = recursive_backtracking(assignment, depth + 1)
+                if result:
+                    return result
+                
+                assignment.pop()
+                visited.remove(neighbor)
+        return None
+    
+    visited.add(start)
+    result = recursive_backtracking([start], 0)
+    return (result, expansions[0])
+#Thuật toán backtracking dùng csp
+def backtracking_csp_8puzzle():
+    variables = [f'V{i}' for i in range(9)]
+    domains = {var: list(range(9)) for var in variables}
+    assignment = {}
+    expansions = [0]
+
+    def is_consistent(var, value, assignment):
+        return value not in assignment.values()
+
+    def recursive_backtrack(assignment):
+        if len(assignment) == len(variables):
+            return assignment
+        unassigned = [v for v in variables if v not in assignment]
+        var = unassigned[0]
+        for value in domains[var]:
+            expansions[0] += 1
+            if is_consistent(var, value, assignment):
+                assignment[var] = value
+                result = recursive_backtrack(assignment)
+                if result:
+                    return result
+                del assignment[var]
+        return None
+
+    result = recursive_backtrack({})
+    if result:
+        final_state = tuple(result[f'V{i}'] for i in range(9))
+        return [final_state], expansions[0]
+    else:
+        return None, expansions[0]
+
+#Thuật toán kiểm thử (Trial and Error)
+def trial_and_error(start, goal, max_depth = 50):
+    visited = set()
+    expansions = [0]
+
+    def try_move(state, path, depth):
+        expansions[0] += 1
+        if state == goal:
+            return path
+        
+        if depth > max_depth:
+            return None
+        
+        visited.add(state)
+        for neighbor in get_neighbors(state):
+            if neighbor not in visited:
+                result = try_move(neighbor, path + [neighbor], depth + 1)
+                if result:
+                    return result
+        visited.remove(state)
+        return None
+    
+    result = try_move(start, [start], 0)
+    return result, expansions[0]
 # ============ 8-Puzzle App =============
 class PuzzleApp(tk.Tk):
     def __init__(self):
@@ -652,8 +801,10 @@ class PuzzleApp(tk.Tk):
             "DFS",
             "UCS",
             "IDDFS",
+            "Backtracking",
+            "Backtracking CSP",
             "--- Informed Search ---",
-            "Greedy",
+            "Greedy",  
             "A*",
             "IDA*",
             "Beam Search",
@@ -666,7 +817,8 @@ class PuzzleApp(tk.Tk):
             "Genetic Algorithm",
             "--- Other ---",
             "AND-OR Search", 
-            "Sensorless Search"
+            "Sensorless Search",
+            "Belief-State BFS"
         ], state="readonly").pack(fill="x", pady=5)
 
 
@@ -906,6 +1058,10 @@ class PuzzleApp(tk.Tk):
             path, expansions = greedy_search(self.start_state, self.goal_state)
         elif algo == "IDDFS":
             path, expansions = iddfs(self.start_state, self.goal_state)
+        elif algo == "Backtracking":
+            path, expansions = backtracking_search(self.start_state, self.goal_state)
+        elif algo == "Backtracking CSP":
+            path, expansions = backtracking_csp_8puzzle()
         elif algo == "A*":
             path, expansions = a_star(self.start_state, self.goal_state)
         elif algo == "IDA*":
@@ -925,7 +1081,7 @@ class PuzzleApp(tk.Tk):
         elif algo == "Genetic Algorithm":
             path, expansions = genetic_algorithm(self.start_state, self.goal_state, log_callback=self.log_to_gui)
         elif algo == "Sensorless Search":
-            start_set = {self.start_state}
+            start_set = {self.start_state, ((1, 2, 3), (7, 0, 5), (8, 4, 6))}
             actions, expansions = sensorless_search(self.goal_state, initial_states=start_set)
             if actions:
                 path = [self.start_state]
@@ -935,6 +1091,20 @@ class PuzzleApp(tk.Tk):
                     path.append(current)
             else:
                 path = None
+        elif algo == "Belief-State BFS":
+            # Sử dụng start_state làm belief ban đầu (1 hoặc nhiều)
+            start_set = {self.start_state}  # Bạn có thể mở rộng thành nhiều nếu cần
+            actions, expansions = belief_bfs(start_set, self.goal_state)
+            if actions:
+                path = [self.start_state]
+                current = self.start_state
+                for move in actions:
+                    current = apply_action(current, move)
+                    path.append(current)
+            else:
+                path = None
+
+
         else:
             path, expansions = None, 0
     
