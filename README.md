@@ -81,3 +81,13 @@
 
 ### 🔍 BEAM SEARCH
 ![Beam Search](gif/BEAM_SEARCH.gif)
+
+### 🔍 Genetic Algorithm
+![Genetic Algorithm](gif/GENETIC.gif)
+
+### 🔍 And-Or Search
+![And-Or Search](gif/AND_OR.gif)
+
+### 🔍 Sensorless Search
+![Sensorless Search](gif/SENSORLESS.gif)
+
