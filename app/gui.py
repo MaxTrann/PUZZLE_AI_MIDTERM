@@ -10,7 +10,8 @@ import random
 from algorithms.helpers import apply_action
 
 from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search, backtracking_csp_search
-from algorithms.informed import greedy_search, a_star, ida_star, beam_search, simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing
+from algorithms.informed import greedy_search, a_star, ida_star, beam_search
+from algorithms.local import simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing
 from algorithms.and_or import and_or_search
 from algorithms.belief_state import sensorless_search, belief_bfs
 from algorithms.evolutionary import genetic_algorithm
