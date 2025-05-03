@@ -6,8 +6,11 @@ import csv
 import math
 import threading
 import random
+from itertools import permutations
 
-from algorithms.helpers import apply_action
+from algorithms.belief_state import apply_action_belief
+
+from algorithms.helpers import apply_action, is_solvable, generate_belief_with_123_top_and_zero_center
 
 from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search, backtracking_csp_search
 from algorithms.informed import greedy_search, a_star, ida_star, beam_search
@@ -237,8 +240,9 @@ class PuzzleApp(tk.Tk):
         if self.is_running:
             self.set_status("Không thể RUN khi thuật toán đang chạy. Vui lòng RESET hoặc chờ hoàn tất.")
             return
-        if not self.start_state or not self.goal_state:
-            self.set_status("Hãy LOAD trước khi RUN.")
+        algo = self.algo_var.get()
+        if algo not in ["Sensorless Search", "Belief-State BFS"] and (not self.start_state or not self.goal_state):
+            self.set_status("Hãy LOAD trước khi RUN hoặc NHẬP đầy đủ.")
             return
         self.solution_path = []
         self.current_step = 0
@@ -365,30 +369,45 @@ class PuzzleApp(tk.Tk):
         elif algo == "Genetic Algorithm":
             path, expansions = genetic_algorithm(self.start_state, self.goal_state, log_callback=self.log_to_gui)
         elif algo == "Sensorless Search":
-            start_set = {self.start_state, ((1, 2, 3), (7, 0, 5), (8, 4, 6))}
+            start_set = {
+                self.start_state,
+                (1, 2, 3, 7, 0, 5, 8, 4, 6)
+            }
             actions, expansions = sensorless_search(self.goal_state, initial_states=start_set)
             if actions:
                 path = [self.start_state]
                 current = self.start_state
-                for move in actions:
-                    current = apply_action(current, move)  # <- cần viết hàm này
-                    path.append(current)
+                for action in actions:
+                    try:
+                        current = apply_action(current, action)
+                        path.append(current)
+                    except Exception as e:
+                        self.set_status(f"Lỗi khi thực hiện action {action}: {e}")
+                        path = None
+                        break
             else:
                 path = None
         elif algo == "Belief-State BFS":
-            # Sử dụng start_state làm belief ban đầu (1 hoặc nhiều)
-            start_set = {self.start_state}  # Bạn có thể mở rộng thành nhiều nếu cần
+            if self.start_state:
+                # Người dùng đã nhập -> chuyển thành tuple of tuple
+                start_tuple = tuple(tuple(self.start_state[i:i+3]) for i in range(0, 9, 3))
+                start_set = {start_tuple}
+            else:
+                # Nếu chưa nhập gì -> khởi tạo toàn bộ belief có thể giải được
+                start_set = generate_belief_with_123_top_and_zero_center()
+
             actions, expansions = belief_bfs(start_set, self.goal_state)
+
             if actions:
-                path = [self.start_state]
-                current = self.start_state
+                # Chọn đại diện đầu tiên trong belief ban đầu để mô phỏng
+                first_state = list(start_set)[0]
+                path = [first_state]
+                current = first_state
                 for move in actions:
-                    current = apply_action(current, move)
+                    current = apply_action_belief(current, move)
                     path.append(current)
             else:
                 path = None
-
-
         else:
             path, expansions = None, 0
     
