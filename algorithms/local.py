@@ -1,7 +1,8 @@
 from .helpers import manhattan_distance, get_neighbors
 import random
 import math
- 
+
+# Test: [[1,2,3], [4,0,6], [7,5,8]]
 def simple_hill_climbing(start, goal):
     current_state = start
     path = [start]  # Thêm path để ghi lại đường đi
@@ -11,7 +12,10 @@ def simple_hill_climbing(start, goal):
         neighbors = get_neighbors(current_state)
         next_state = None
         for neighbor in neighbors:
-            if manhattan_distance(neighbor) < manhattan_distance(current_state):
+            if neighbor == goal:
+                path.append(neighbor)
+                return path, expansions
+            if manhattan_distance(neighbor, goal) < manhattan_distance(current_state, goal):
                 next_state = neighbor
                 break
         if next_state is None:
@@ -31,15 +35,15 @@ def steepest_ascent_hill_climbing(start, goal):
         expansions += 1
         neighbors = get_neighbors(current_state)
         best_neighbor = None
-        best_score = manhattan_distance(current_state)
+        best_score = manhattan_distance(current_state, goal)
         
         for neighbor in neighbors:
-            score = manhattan_distance(neighbor)
+            score = manhattan_distance(neighbor, goal) # điểm khác biệt so với simple (simple lấy phần tử đầu tiên tốt hơn)
             if score < best_score:
                 best_score = score
                 best_neighbor = neighbor
 
-        if best_neighbor is None or best_score >= manhattan_distance(current_state):
+        if best_neighbor is None or best_score >= manhattan_distance(current_state, goal):
             break
         current_state = best_neighbor
         path.append(current_state)  # Ghi lại trạng thái mới
@@ -59,7 +63,7 @@ def stochastic_hill_climbing(start, goal):
 
         # Tìm các trạng thái lân cận tốt hơn
         for neighbor in neighbors:
-            if manhattan_distance(neighbor) < manhattan_distance(current_state):
+            if manhattan_distance(neighbor, goal) < manhattan_distance(current_state, goal):
                 better_neighbors.append(neighbor)
 
         if not better_neighbors:  # Không có trạng thái nào tốt hơn
@@ -76,7 +80,7 @@ def stochastic_hill_climbing(start, goal):
  
 def simulated_annealing(start, goal, initial_temp=1000, cooling_rate=0.99, min_temp=0.1):
     current_state = start
-    current_eval = manhattan_distance(current_state)
+    current_eval = manhattan_distance(current_state, goal)
     path = [start]  # Ghi lại đường đi
     expansions = 0
     temperature = initial_temp
@@ -89,7 +93,7 @@ def simulated_annealing(start, goal, initial_temp=1000, cooling_rate=0.99, min_t
 
         # Chọn ngẫu nhiên một trạng thái lân cận
         next_state = random.choice(neighbors)
-        next_eval = manhattan_distance(next_state)
+        next_eval = manhattan_distance(next_state, goal)
 
         # Tính toán sự thay đổi giá trị heuristic
         delta_eval = next_eval - current_eval
