@@ -70,3 +70,23 @@ def generate_belief_with_123_top_and_zero_center():
             state = tuple(tuple(p[i:i+3]) for i in range(0, 9, 3))
             possible_states.add(state)
     return possible_states
+
+def calculate_costs(path):
+    return list(range(len(path)))
+
+
+def get_move_direction(prev_state, curr_state):
+    prev_x, prev_y = get_zero_position(prev_state)
+    curr_x, curr_y = get_zero_position(curr_state)
+    if curr_x < prev_x: return "up"
+    elif curr_x > prev_x: return "down"
+    elif curr_y < prev_y: return "left"
+    elif curr_y > prev_y: return "right"
+    return None
+
+def get_zero_position(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
+    return None

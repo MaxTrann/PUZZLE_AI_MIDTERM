@@ -12,7 +12,7 @@ from algorithms.belief_state import apply_action_belief
 
 from algorithms.helpers import apply_action, is_solvable, generate_belief_with_123_top_and_zero_center
 
-from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search, backtracking_csp_search
+from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search, solve
 from algorithms.informed import greedy_search, a_star, ida_star, beam_search
 from algorithms.local import simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing
 from algorithms.and_or import and_or_search
@@ -349,7 +349,33 @@ class PuzzleApp(tk.Tk):
         elif algo == "Backtracking":
             path, expansions = backtracking_search(self.start_state, self.goal_state)
         elif algo == "Backtracking CSP":
-            path, expansions = backtracking_csp_search()
+            start_time = time.perf_counter()
+            path, costs, _ = self.adapt_backtracking([[0]*3 for _ in range(3)], self.goal_state)
+            duration = time.perf_counter() - start_time
+
+            if path:
+                # Thiết lập cho animate
+                self.solution_path = path
+                self.current_step = 0
+                self.playing = True
+                self.paused = False
+
+                # Cập nhật bảng kết quả
+                expansions = len(path)
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                self.set_status(
+                    f"Đã sinh trạng thái hợp lệ bằng CSP.\n"
+                    f"Thời gian: {duration:.4f}s\n"
+                    f"Expansions: {expansions}"
+                )
+
+                # Bắt đầu animate: board + log
+                self.animate_solution()
+            else:
+                self.set_status("Không thể sinh trạng thái hợp lệ.")
+
+            return
+
         elif algo == "A*":
             path, expansions = a_star(self.start_state, self.goal_state)
         elif algo == "IDA*":
@@ -475,3 +501,25 @@ class PuzzleApp(tk.Tk):
             row_str = " ".join(str(x) if x != 0 else "_" for x in row)
             lines.append(row_str)
         return "\n".join(lines)
+    def adapt_backtracking(self, initial_state, goal_state=None):
+        from algorithms.uninformed import solve
+        # solve() trả về dict với 'path' là list các grid 3×3
+        result = solve(initial_state)
+        if not result["solution"]:
+            return None, None, []
+
+        # Flatten từng grid 3×3 thành tuple 9 phần tử
+        flat_path = []
+        for grid in result["path"]:
+            flat = tuple(0 if cell is None else cell
+                        for row in grid for cell in row)
+            flat_path.append(flat)
+
+        # Chi phí = chỉ số bước
+        costs = list(range(len(flat_path)))
+
+        # all_paths (nếu cần)
+        all_paths = [(flat_path[:i+1], costs[i])
+                    for i in range(len(flat_path))]
+
+        return flat_path, costs, all_paths
