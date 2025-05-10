@@ -12,11 +12,13 @@ from algorithms.belief_state import apply_action_belief
 
 from algorithms.helpers import apply_action, is_solvable, generate_belief_with_123_top_and_zero_center
 
-from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search, solve
+from algorithms.uninformed import bfs, dfs, iddfs, ucs, backtracking_search
 from algorithms.informed import greedy_search, a_star, ida_star, beam_search
 from algorithms.local import simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing
 from algorithms.and_or import and_or_search
 from algorithms.belief_state import sensorless_search, belief_bfs
+from algorithms.evolutionary import genetic_algorithm
+from algorithms.constraint import solve, ac3, create_constraints, backtrack, solve_with_ac3
 from algorithms.evolutionary import genetic_algorithm
 class PuzzleApp(tk.Tk):
     def __init__(self):
@@ -88,7 +90,8 @@ class PuzzleApp(tk.Tk):
             "DFS",
             "UCS",
             "IDDFS",
-            "Backtracking",
+            "--- CSP Inference ---",
+            "Backtracking AC-3",
             "Backtracking CSP",
             "--- Informed Search ---",
             "Greedy",  
@@ -346,8 +349,8 @@ class PuzzleApp(tk.Tk):
             path, expansions = greedy_search(self.start_state, self.goal_state)
         elif algo == "IDDFS":
             path, expansions = iddfs(self.start_state, self.goal_state)
-        elif algo == "Backtracking":
-            path, expansions = backtracking_search(self.start_state, self.goal_state)
+        # elif algo == "Backtracking":
+        #     path, expansions = backtracking_search(self.start_state, self.goal_state)
         elif algo == "Backtracking CSP":
             start_time = time.perf_counter()
             path, costs, _ = self.adapt_backtracking([[0]*3 for _ in range(3)], self.goal_state)
@@ -434,6 +437,30 @@ class PuzzleApp(tk.Tk):
                     path.append(current)
             else:
                 path = None
+        elif algo == "Backtracking AC-3":
+            start_time = time.perf_counter()
+            path, costs, all_paths, arc_count = self.adapt_backtracking_ac3()
+            duration = time.perf_counter() - start_time
+
+            if path:
+                self.solution_path = path
+                self.current_step = 0
+                self.playing = True
+                self.paused = False
+
+                expansions = len(path)
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                self.set_status(
+                    f"AC-3 + Backtrack đã tạo ra trạng thái hợp lệ.\n"
+                    f"Thời gian: {duration:.4f}s\n"
+                    f"Expansions: {expansions}\n"
+                    f"Arc Processed: {arc_count}"
+                )
+
+                self.animate_solution()
+            else:
+                self.set_status("Không thể sinh trạng thái hợp lệ bằng AC-3.")
+            return
         else:
             path, expansions = None, 0
     
@@ -502,7 +529,7 @@ class PuzzleApp(tk.Tk):
             lines.append(row_str)
         return "\n".join(lines)
     def adapt_backtracking(self, initial_state, goal_state=None):
-        from algorithms.uninformed import solve
+        from algorithms.constraint import solve
         # solve() trả về dict với 'path' là list các grid 3×3
         result = solve(initial_state)
         if not result["solution"]:
@@ -523,3 +550,23 @@ class PuzzleApp(tk.Tk):
                     for i in range(len(flat_path))]
 
         return flat_path, costs, all_paths
+    
+    def adapt_backtracking_ac3(self, goal_state=None):
+        from algorithms.constraint import solve_with_ac3
+
+        result = solve_with_ac3()
+        if not result["solution"]:
+            return None, None, [], 0  # thêm 0 là arc_processed
+
+        flat_path = []
+        for grid in result["path"]:
+            flat = tuple(0 if cell is None else cell
+                        for row in grid for cell in row)
+            flat_path.append(flat)
+
+        costs = list(range(len(flat_path)))
+        all_paths = [(flat_path[:i+1], costs[i]) for i in range(len(flat_path))]
+
+        arc_count = result.get("arc_processed", 0)
+        return flat_path, costs, all_paths, arc_count
+
