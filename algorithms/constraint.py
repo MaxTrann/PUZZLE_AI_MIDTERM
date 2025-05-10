@@ -217,3 +217,47 @@ def solve_with_ac3():
             'solution': None,
             'arc_processed': arc_count[0]
         }
+
+def solve_trial_and_error():
+    import random
+    from algorithms.helpers import is_solvable
+    from collections import deque
+
+    nodes_expanded = [0]
+    max_depth = [0]
+    path = []
+
+    variables = [f"X{i+1}" for i in range(9)]
+    domains = {var: list(range(9)) for var in variables}  # Không xáo trộn để giữ đúng nghĩa trial & error
+    # Shuffle để tạo tính ngẫu nhiên
+    for var in domains:
+        random.shuffle(domains[var])
+        
+    constraints = create_constraints()
+
+    csp = {
+        'variables': variables,
+        'domains': domains,
+        'constraints': constraints,
+        'initial_assignment': {}
+    }
+
+    result = backtrack({}, 0, csp, nodes_expanded, max_depth, path)
+
+    if result:
+        solution_grid = [[0 for _ in range(3)] for _ in range(3)]
+        for var, value in result.items():
+            idx = int(var[1:]) - 1
+            row, col = idx // 3, idx % 3
+            solution_grid[row][col] = value
+
+        # Chuyển path dạng 3x3 thành flat để GUI animate
+        flat_path = []
+        for grid in path:
+            flat = tuple(0 if cell is None else cell for row in grid for cell in row)
+            flat_path.append(flat)
+
+        return flat_path, nodes_expanded[0], max_depth[0]
+
+    else:
+        return [], nodes_expanded[0], max_depth[0]
