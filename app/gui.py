@@ -18,7 +18,7 @@ from algorithms.local import simple_hill_climbing, steepest_ascent_hill_climbing
 from algorithms.and_or import and_or_search
 from algorithms.belief_state import sensorless_search, belief_bfs
 from algorithms.evolutionary import genetic_algorithm
-from algorithms.constraint import solve, ac3, create_constraints, backtrack, solve_with_ac3
+from algorithms.constraint import solve, ac3, create_constraints, backtrack, solve_with_ac3, solve_trial_and_error
 from algorithms.evolutionary import genetic_algorithm
 class PuzzleApp(tk.Tk):
     def __init__(self):
@@ -85,27 +85,27 @@ class PuzzleApp(tk.Tk):
         self.algo_var = tk.StringVar(value="BFS")
         ttk.Label(controls_box, text="ALGORITHMS:").pack(anchor="w")
         ttk.Combobox(controls_box, textvariable=self.algo_var, values=[
-            "--- Uninformed Search ---",
+            "--- Tìm kiếm không có thông tin ---",
             "BFS",
             "DFS",
             "UCS",
             "IDDFS",
-            "--- CSP Inference ---",
-            "Backtracking AC-3",
-            "Backtracking CSP",
-            "--- Informed Search ---",
+            "--- Tìm kiếm có thông tin ---",
             "Greedy",  
             "A*",
             "IDA*",
-            "Beam Search",
-            "--- Local Search ---",
+            "--- Tìm kiếm có ràng buộc ---",
+            "Backtracking AC-3",
+            "Backtracking CSP",
+            "Trial and Error",
+            "--- Tìm kiếm cục bộ ---",
             "Simple Hill Climbing",
             "Steepest-ascent Climbing",
             "Stochastic Hill Climbing",
             "Simulated Annealing",
-            "--- Evolutionary ---",
+            "Beam Search",
             "Genetic Algorithm",
-            "--- Other ---",
+            "--- Tìm kiếm môi trường phức tạp ---",
             "AND-OR Search", 
             "Sensorless Search",
             "Belief-State BFS"
@@ -461,6 +461,29 @@ class PuzzleApp(tk.Tk):
             else:
                 self.set_status("Không thể sinh trạng thái hợp lệ bằng AC-3.")
             return
+        elif algo == "Trial and Error":
+            start_time = time.perf_counter()
+            path, expansions, depth = solve_trial_and_error()
+            duration = time.perf_counter() - start_time
+
+            if path:
+                self.solution_path = path
+                self.current_step = 0
+                self.playing = True
+                self.paused = False
+
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                self.set_status(
+                    f"Đã sinh trạng thái hợp lệ bằng Trial and Error.\n"
+                    f"Thời gian: {duration:.4f}s\n"
+                    f"Expansions: {expansions}"
+                )
+                self.animate_solution()
+            else:
+                self.set_status("Không thể sinh trạng thái hợp lệ bằng Trial and Error.")
+
+            return
+
         else:
             path, expansions = None, 0
     
