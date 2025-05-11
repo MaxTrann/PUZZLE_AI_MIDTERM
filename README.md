@@ -103,29 +103,45 @@ PUZZLE_AI_MIDTERM/
 ![IDDFS](gif/IDDFS.gif)
 
 ### 📙 Tìm kiếm có thông tin
-- ![Greedy](gif/GREEDY.gif)
-- ![A*](gif/A_STAR.gif)
-- ![IDA*](gif/IDA_STAR.gif)
+### 🔍 GREEDY
+![Greedy](gif/GREEDY.gif)
+### 🔍 A_STAR
+![A*](gif/A_STAR.gif)
+### 🔍 IDA_STAR
+![IDA*](gif/IDA_STAR.gif)
 
 ### 📘 Tìm kiếm có ràng buộc
-- ![Backtracking AC3](gif/AC3.gif)
-- ![Backtracking CSP](gif/CSP.gif)
-- ![Trial and Error](gif/TRIAL.gif)
+### 🔍 BACKTRACKING AC3
+![Backtracking AC3](gif/AC3.gif)
+### 🔍 BACKTRACKING CSP
+![Backtracking CSP](gif/CSP.gif)
+### 🔍 TRIAL AND ERROR
+![Trial and Error](gif/TRIAL.gif)
 
 ### 📕 Tìm kiếm cục bộ
-- ![Simple Hill Climbing](gif/SIMPLE_CLIMBING.gif)
-- ![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
-- ![Stochastic Hill Climbing](gif/STOCHASTIC.gif)
-- ![Simulated Annealing](gif/SIMULATED.gif)
-- ![Beam Search](gif/BEAM_SEARCH.gif)
+### 🔍 SIMPLE HILL CLIMBING
+![Simple Hill Climbing](gif/SIMPLE_CLIMBING.gif)
+### 🔍 STEEPEST HILL CLIMBING
+![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
+### 🔍 STOCHASTIC HILL CLIMBING
+![Stochastic Hill Climbing](gif/STOCHASTIC.gif)
+### 🔍 SIMULATED ANNEALING
+![Simulated Annealing](gif/SIMULATED.gif)
+### 🔍 BEAM SEARCH
+![Beam Search](gif/BEAM_SEARCH.gif)
+### 🔍 GENETIC ALGORITHM
+![Genetic Algorithm](gif/GENETIC.gif)
 
 ### 📒 Tìm kiếm trong môi trường phức tạp
-- ![Genetic Algorithm](gif/GENETIC.gif)
+### 🔍 SENSORLESS SEARCH
+![Sensorless Search](gif/SENSORLESS.gif)
+### 🔍 BELIEF-STATE BFS
+![Belief-State BFS](gif/BELIEF_BFS.gif)
+### 🔍 AND-OR SEARCH
+![AND-OR Search](gif/AND_OR.gif)
 
 ### 📗 Học củng cố
-- ![Sensorless Search](gif/SENSORLESS.gif)
-- ![Belief-State BFS](gif/BELIEF_BFS.gif)
-- ![AND-OR Search](gif/AND_OR.gif)
+
 
 ---
 
