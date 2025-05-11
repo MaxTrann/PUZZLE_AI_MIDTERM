@@ -626,7 +626,7 @@ class PuzzleApp(tk.Tk):
                 self.animate_solution()
             else:
                 self.set_status("Q-Learning không tìm thấy lời giải.")
-            #return
+            return # nếu ko để return thì sẽ chạy tiếp đoạn dưới
         else:
             path, expansions = None, 0
     
