@@ -93,10 +93,14 @@ PUZZLE_AI_MIDTERM/
 ## 📽️ Minh họa lời giải theo từng nhóm thuật toán
 
 ### 📘 Tìm kiếm không có thông tin
-- ![BFS](gif/BFS.gif)
-- ![DFS](gif/DFS.gif)
-- ![UCS](gif/UCS.gif)
-- ![IDDFS](gif/IDDFS.gif)
+### 🔍 BFS
+![BFS](gif/BFS.gif)
+### 🔍 DFS
+![DFS](gif/DFS.gif)
+### 🔍 UCS
+![UCS](gif/UCS.gif)
+### 🔍 IDDFS
+![IDDFS](gif/IDDFS.gif)
 
 ### 📙 Tìm kiếm có thông tin
 - ![Greedy](gif/GREEDY.gif)
