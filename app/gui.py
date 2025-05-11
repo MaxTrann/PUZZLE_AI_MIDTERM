@@ -29,6 +29,8 @@ class PuzzleApp(tk.Tk):
 
         self.start_state = None
         self.goal_state = None
+        self.belief_start_list = []  # bao gồm start_matrix và các matrix được thêm
+        self.belief_goal_list = []   # bao gồm goal_matrix và các matrix được thêm
         self.solution_path = []
         self.current_step = 0
         self.playing = False
@@ -62,8 +64,39 @@ class PuzzleApp(tk.Tk):
         input_box = ttk.LabelFrame(left_frame, text="Nhập Ma Trận", padding=10)
         input_box.pack(fill="both", pady=(0, 10)) # fill là both để khung ko bị nhỏ
         
-        self.start_matrix = self.create_matrix(input_box, "Initial State:", 0)
-        self.goal_matrix = self.create_matrix(input_box, "Goal State:", 1, [[1,2,3], [4,5,6], [7,8,0]])
+        # Tạo Canvas và Scrollbar bên trong input_box
+        canvas = tk.Canvas(input_box, height=200, width=440)  # Đặt chiều cao cố định
+        scrollbar = ttk.Scrollbar(input_box, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Khung nội dung bên trong Canvas
+        input_frame = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=input_frame, anchor="nw")
+
+        # Cập nhật scrollregion khi kích thước thay đổi
+        def configure_scrollregion(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        input_frame.bind("<Configure>", configure_scrollregion)
+
+        # Đặt Canvas và Scrollbar trong input_box
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Khu vực cho START
+        start_box = ttk.LabelFrame(input_frame, text="Initial State", padding=10)
+        start_box.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+        self.start_matrix = self.create_matrix(start_box, "Initial State:", 0)
+        self.belief_start_list.append(self.start_matrix)
+        ttk.Button(start_box, text="+ Thêm trạng thái START", command=lambda: self.add_belief_matrix(start_box, self.belief_start_list)).grid(row=2, column=0, pady=5)
+
+        # Khu vực cho GOAL
+        goal_box = ttk.LabelFrame(input_frame, text="Goal State", padding=10)
+        goal_box.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.goal_matrix = self.create_matrix(goal_box, "Goal State:", 0, [[1, 2, 3], [4, 5, 6], [7, 8, 0]])
+        self.belief_goal_list.append(self.goal_matrix)
+        ttk.Button(goal_box, text="+ Thêm trạng thái GOAL", command=lambda: self.add_belief_matrix(goal_box, self.belief_goal_list)).grid(row=2, column=0, pady=5)
+
 
         # Box kết quả
         results_box = ttk.LabelFrame(left_frame, text="Kết Quả Thuật Toán", padding=10)
@@ -107,8 +140,8 @@ class PuzzleApp(tk.Tk):
             "Genetic Algorithm",
             "--- Tìm kiếm môi trường phức tạp ---",
             "AND-OR Search", 
-            "Sensorless Search",
-            "Belief-State BFS"
+            "Sensorless Search ~ Search with No Observation",
+            "Belief-State BFS ~ Search with Partial Observation"
         ], state="readonly").pack(fill="x", pady=5)
 
 
@@ -153,7 +186,45 @@ class PuzzleApp(tk.Tk):
                 row.append(e)
             matrix.append(row)
         return matrix
+    def add_belief_matrix(self, parent, target_list):
+        # Tính toán row dựa trên số lượng ma trận hiện có
+        current_row = parent.grid_size()[1]  # Lấy số hàng hiện tại trong grid của parent
+        container = ttk.Frame(parent)
+        container.grid(row=current_row, column=0, pady=4, sticky="w")  # Sử dụng row động
+        matrix = []
+        for r in range(3):
+            row = []
+            for c in range(3):
+                e = ttk.Entry(container, width=3, font=("Arial", 11), justify="center")
+                e.grid(row=r, column=c, padx=1, pady=1)
+                row.append(e)
+            matrix.append(row)
+        # Nút xóa sử dụng grid
+        del_btn = ttk.Button(container, text="Xóa", command=lambda: self.remove_belief_matrix(container, matrix, target_list))
+        del_btn.grid(row=0, column=3, rowspan=3, padx=5)
+        target_list.append(matrix)
+    def remove_belief_matrix(self, container, matrix, target_list):
+        container.destroy()
+        target_list.remove(matrix)
 
+    def read_all_beliefs(self, matrix_list):
+        result = []
+        for mat in matrix_list:
+            grid = []
+            for row in mat:
+                row_vals = []
+                for e in row:
+                    try:
+                        v = e.get().strip()
+                        val = int(v) if v else 0
+                        row_vals.append(val)
+                    except ValueError:
+                        row_vals.append(0)  # Nếu nhập ký tự không hợp lệ, thay bằng 0
+                grid.append(tuple(row_vals))
+            # Kiểm tra đủ 3 hàng 3 cột
+            if len(grid) == 3 and all(len(r) == 3 for r in grid):
+                result.append(tuple(grid))
+        return result
     def setup_center_frame(self, main_frame):
         center_frame = ttk.Frame(main_frame)
         center_frame.pack(side="left", expand=True, fill="both", padx=10)
@@ -244,7 +315,7 @@ class PuzzleApp(tk.Tk):
             self.set_status("Không thể RUN khi thuật toán đang chạy. Vui lòng RESET hoặc chờ hoàn tất.")
             return
         algo = self.algo_var.get()
-        if algo not in ["Sensorless Search", "Belief-State BFS"] and (not self.start_state or not self.goal_state):
+        if algo not in ["Sensorless Search ~ Search with No Observation", "Belief-State BFS ~ Search with Partial Observation"] and (not self.start_state or not self.goal_state):
             self.set_status("Hãy LOAD trước khi RUN hoặc NHẬP đầy đủ.")
             return
         self.solution_path = []
@@ -326,12 +397,30 @@ class PuzzleApp(tk.Tk):
     def on_exit_clicked(self):
         self.destroy()
     
+    def get_belief_states(self):
+        """
+        Đọc tất cả các ma trận từ belief_start_list và belief_goal_list.
+        Trả về tập hợp các trạng thái đầu vào và trạng thái mục tiêu.
+        """
+        start_belief = set(self.read_all_beliefs(self.belief_start_list))
+        goal_belief = set(self.read_all_beliefs(self.belief_goal_list))
+        return start_belief, goal_belief
+
     def run_search(self):
         self.set_status("Đang tìm lời giải...")
         algo = self.algo_var.get()
 
         if algo.startswith("---"):
             self.set_status("Vui lòng chọn một thuật toán hợp lệ.")
+            self.is_running = False
+            self.load_button.config(state="normal")
+            self.run_button.config(state="normal")
+            return
+
+        # Lấy tất cả trạng thái đầu vào và mục tiêu
+        start_set, goal_set = self.get_belief_states()
+        if not start_set or not goal_set:
+            self.set_status("Hãy LOAD trước khi RUN hoặc NHẬP đầy đủ.")
             self.is_running = False
             self.load_button.config(state="normal")
             self.run_button.config(state="normal")
@@ -397,44 +486,73 @@ class PuzzleApp(tk.Tk):
             path, expansions = and_or_search(self.start_state, self.goal_state)
         elif algo == "Genetic Algorithm":
             path, expansions = genetic_algorithm(self.start_state, self.goal_state, log_callback=self.log_to_gui)
-        elif algo == "Sensorless Search":
-            start_set = {
-                self.start_state,
-                (1, 2, 3, 7, 0, 5, 8, 4, 6)
-            }
-            actions, expansions = sensorless_search(self.goal_state, initial_states=start_set)
+        elif algo == "Sensorless Search ~ Search with No Observation":
+            # đọc về các belief ban đầu & goal đều là tuple-of-tuples (3×3)
+            raw_starts = set(self.read_all_beliefs(self.belief_start_list))
+            raw_goals  = set(self.read_all_beliefs(self.belief_goal_list))
+
+            # gọi sensorless_search (nó sẽ flatten bên trong)
+            actions, expansions = sensorless_search(raw_starts, raw_goals)
+
             if actions:
-                path = [self.start_state]
-                current = self.start_state
-                for action in actions:
-                    try:
-                        current = apply_action(current, action)
-                        path.append(current)
-                    except Exception as e:
-                        self.set_status(f"Lỗi khi thực hiện action {action}: {e}")
-                        path = None
+                path = None
+                for s in raw_starts:
+                    current = sum(s, ())  # flatten
+                    temp_path = [current]
+                    success = True
+                    for move in actions:
+                        current = apply_action(current, move)
+                        if current is None:
+                            success = False
+                            break
+                        temp_path.append(current)
+                    if success and current in {sum(g, ()) for g in raw_goals}:
+                        path = temp_path
                         break
+
+                if path is None:
+                    # fallback nếu không có state nào match (hiếm khi xảy ra)
+                    first_3x3 = next(iter(raw_starts))
+                    current = sum(first_3x3, ())
+                    path = [current]
+                    for move in actions:
+                        current = apply_action(current, move)
+                        path.append(current)
             else:
                 path = None
-        elif algo == "Belief-State BFS":
-            if self.start_state:
-                # Người dùng đã nhập -> chuyển thành tuple of tuple
-                start_tuple = tuple(tuple(self.start_state[i:i+3]) for i in range(0, 9, 3))
-                start_set = {start_tuple}
-            else:
-                # Nếu chưa nhập gì -> khởi tạo toàn bộ belief có thể giải được
-                start_set = generate_belief_with_123_top_and_zero_center()
+        elif algo == "Belief-State BFS ~ Search with Partial Observation":
+            start_set = set(self.read_all_beliefs(self.belief_start_list))
+            goal_set = set(self.read_all_beliefs(self.belief_goal_list))
 
-            actions, expansions = belief_bfs(start_set, self.goal_state)
+            actions, expansions = belief_bfs(start_set, goal_set)
 
             if actions:
-                # Chọn đại diện đầu tiên trong belief ban đầu để mô phỏng
-                first_state = list(start_set)[0]
-                path = [first_state]
-                current = first_state
-                for move in actions:
-                    current = apply_action_belief(current, move)
-                    path.append(current)
+                # Tìm state ban đầu sao cho sau khi thực hiện actions sẽ match với 1 goal
+                path = None
+                for s in start_set:
+                    current = s
+                    temp_path = [current]
+                    success = True
+                    for move in actions:
+                        current = apply_action_belief(current, move)
+                        if current is None:
+                            success = False
+                            break
+                        temp_path.append(current)
+                    if success and current in goal_set:
+                        path = temp_path
+                        break
+
+                if path is None:
+                    # fallback nếu không state nào match goal
+                    first_state = next(iter(start_set))
+                    path = [first_state]
+                    current = first_state
+                    for move in actions:
+                        new_state = apply_action_belief(current, move)
+                        if new_state is None:
+                            break
+                        path.append(new_state)
             else:
                 path = None
         elif algo == "Backtracking AC-3":
@@ -534,9 +652,15 @@ class PuzzleApp(tk.Tk):
         self.log_box.config(state="disabled")   
 
     def display_state(self, state):
-        for i, val in enumerate(state):
+        flat_state = sum(state, ()) if isinstance(state[0], tuple) else state
+        for i, val in enumerate(flat_state):
             r, c = divmod(i, 3)
-            self.tiles[r][c].config(text=str(val) if val != 0 else "")
+            self.tiles[r][c].config(
+                text=str(val) if val != 0 else "",
+                font=("Arial", 20),
+                width=4,
+                height=2
+            )
     
     def set_status(self, msg):
         self.status_box.config(state="normal")
