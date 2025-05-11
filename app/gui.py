@@ -141,7 +141,9 @@ class PuzzleApp(tk.Tk):
             "--- Tìm kiếm môi trường phức tạp ---",
             "AND-OR Search", 
             "Sensorless Search ~ Search with No Observation",
-            "Belief-State BFS ~ Search with Partial Observation"
+            "Belief-State BFS ~ Search with Partial Observation",
+            "--- Học củng cố ---",
+            "Q-Learning",
         ], state="readonly").pack(fill="x", pady=5)
 
 

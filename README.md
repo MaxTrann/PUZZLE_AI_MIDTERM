@@ -10,37 +10,38 @@
 
 ### 🔎 Các nhóm thuật toán được hỗ trợ:
 
-#### 📘 1. **Tìm kiếm không sử dụng heuristic (Uninformed Search):**
+#### 📘 1. **Tìm kiếm không có thông tin (Uninformed Search):**
 - Breadth-First Search (BFS) – Tìm kiếm theo chiều rộng
 - Depth-First Search (DFS) – Tìm kiếm theo chiều sâu
 - Uniform Cost Search (UCS) – Tìm kiếm chi phí đều
-- Iterative Deepening Search (IDDFS) – Tìm kiếm sâu dần
-- Backtracking Search – Tìm kiếm quay lui
-- Backtracking CSP – Giải bằng ràng buộc (Constraint Satisfaction)
+- Iterative Deepening DFS (IDDFS) – Tìm kiếm sâu dần
 
-#### 📙 2. **Tìm kiếm sử dụng heuristic (Informed Search):**
+#### 📙 2. **Tìm kiếm có thông tin (Informed Search):**
 - Greedy Best-First Search – Tìm kiếm tham lam
 - A* Search – A sao
-- IDA* (Iterative Deepening A*) – A* sâu dần
-- Beam Search – Tìm kiếm chùm
+- IDA* – A* sâu dần
 
-#### 📕 3. **Tìm kiếm cục bộ (Local Search):**
-- Simple Hill Climbing – Leo đồi đơn giản
-- Steepest Ascent Climbing – Leo đồi dốc nhất
-- Stochastic Hill Climbing – Leo đồi ngẫu nhiên
-- Simulated Annealing – Mô phỏng luyện kim
+#### 📘 3. **Tìm kiếm có ràng buộc (Constraint Search):**
+- Backtracking AC-3
+- Backtracking CSP
+- Trial and Error
 
-#### 📗 4. **Thuật toán tiến hóa (Evolutionary):**
-- Genetic Algorithm – Giải thuật di truyền
+#### 📕 4. **Tìm kiếm cục bộ (Local Search):**
+- Simple Hill Climbing
+- Steepest-ascent Climbing
+- Stochastic Hill Climbing
+- Simulated Annealing
+- Beam Search
+- Genetic Algorithm
 
-#### 📒 5. **Tìm kiếm trạng thái niềm tin (Belief-Based Search):**
-- Sensorless Search – Tìm kiếm không cảm biến
-- Belief-State BFS – Tìm kiếm niềm tin theo BFS
+#### 📒 5. **Tìm kiếm trong môi trường phức tạp:**
+- AND-OR Search
+- Sensorless Search ~ Search with No Observation
+- Belief-State BFS ~ Search with Partial Observation
+- Q-Learning (cơ bản)
 
-#### 📓 6. **Khác:**
-- AND-OR Search – Tìm kiếm điều kiện rẽ nhánh
-- Trial-and-Error – Thuật toán thử và sai
-
+#### 📗 6. **Học củng cố (Reforcement Learning):**
+- Q-Learning
 ---
 
 ## 🖥️ Giao diện người dùng (GUI)
@@ -58,21 +59,24 @@
 ## 📂 Cấu trúc thư mục
 
 ```
-8-puzzle-visualizer/
+PUZZLE_AI_MIDTERM/
 ├── algorithms/
-│   ├── uninformed.py
-│   ├── informed.py
-│   ├── local.py
-│   ├── belief_state.py
-│   ├── evolutionary.py
-│   ├── and_or.py
-│   └── helpers.py
+│ ├── pycache/
+│ ├── and_or.py
+│ ├── belief_state.py
+│ ├── constraint.py
+│ ├── evolutionary.py
+│ ├── helpers.py
+│ ├── informed.py
+│ ├── local.py
+│ └── uninformed.py
 ├── app/
-│   └── gui.py
+│ ├── pycache/
+│ └── gui.py
+├── gif/
+│ └── *.gif
 ├── main.py
 ├── README.md
-├── gif/
-│   └── *.gif
 ```
 
 ---
@@ -86,46 +90,38 @@
 
 ---
 
-## 📽️ Minh họa lời giải từng thuật toán
+## 📽️ Minh họa lời giải theo từng nhóm thuật toán
 
-### 🔍 BFS
-![BFS](gif/BFS.gif)
+### 📘 Tìm kiếm không có thông tin
+- ![BFS](gif/BFS.gif)
+- ![DFS](gif/DFS.gif)
+- ![UCS](gif/UCS.gif)
+- ![IDDFS](gif/IDDFS.gif)
 
-### 🔍 DFS
-![DFS](gif/DFS.gif)
+### 📙 Tìm kiếm có thông tin
+- ![Greedy](gif/GREEDY.gif)
+- ![A*](gif/A_STAR.gif)
+- ![IDA*](gif/IDA_STAR.gif)
 
-### 🔍 UCS
-![UCS](gif/UCS.gif)
+### 📘 Tìm kiếm có ràng buộc
+- ![Backtracking AC3](gif/AC3.gif)
+- ![Backtracking CSP](gif/CSP.gif)
+- ![Trial and Error](gif/TRIAL.gif)
 
-### 🔍 IDDFS
-![IDDFS](gif/IDDFS.gif)
+### 📕 Tìm kiếm cục bộ
+- ![Simple Hill Climbing](gif/SIMPLE_CLIMBING.gif)
+- ![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
+- ![Stochastic Hill Climbing](gif/STOCHASTIC.gif)
+- ![Simulated Annealing](gif/SIMULATED.gif)
+- ![Beam Search](gif/BEAM_SEARCH.gif)
 
-### 🔍 A*
-![A*](gif/A_STAR.gif)
+### 📒 Tìm kiếm trong môi trường phức tạp
+- ![Genetic Algorithm](gif/GENETIC.gif)
 
-### 🔍 IDA*
-![IDA*](gif/IDA_STAR.gif)
-
-### 🔍 Greedy Best First Search
-![Greedy](gif/GREEDY.gif)
-
-### 🔍 Simple Hill Climbing
-![Simple Hill Climbing](gif/SIMPLE_CLIMBING.gif)
-
-### 🔍 Steepest Ascent Hill Climbing
-![Steepest Climbing](gif/STEEPEST_CLIMBING.gif)
-
-### 🔍 Beam Search
-![Beam Search](gif/BEAM_SEARCH.gif)
-
-### 🔍 Genetic Algorithm
-![Genetic Algorithm](gif/GENETIC.gif)
-
-### 🔍 AND-OR Search
-![And-Or Search](gif/AND_OR.gif)
-
-### 🔍 Sensorless Search
-![Sensorless Search](gif/SENSORLESS.gif)
+### 📗 Học củng cố
+- ![Sensorless Search](gif/SENSORLESS.gif)
+- ![Belief-State BFS](gif/BELIEF_BFS.gif)
+- ![AND-OR Search](gif/AND_OR.gif)
 
 ---
 
