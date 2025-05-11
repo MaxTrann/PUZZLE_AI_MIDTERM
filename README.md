@@ -38,7 +38,6 @@
 - AND-OR Search
 - Sensorless Search ~ Search with No Observation
 - Belief-State BFS ~ Search with Partial Observation
-- Q-Learning (cơ bản)
 
 #### 📗 6. **Học củng cố (Reforcement Learning):**
 - Q-Learning
