@@ -20,6 +20,7 @@ from algorithms.belief_state import sensorless_search, belief_bfs
 from algorithms.evolutionary import genetic_algorithm
 from algorithms.constraint import solve, ac3, create_constraints, backtrack, solve_with_ac3, solve_trial_and_error
 from algorithms.evolutionary import genetic_algorithm
+from algorithms.q_learning import q_learning
 class PuzzleApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -603,7 +604,29 @@ class PuzzleApp(tk.Tk):
                 self.set_status("Không thể sinh trạng thái hợp lệ bằng Trial and Error.")
 
             return
+        elif algo == "Q-Learning":
+            start = self.start_state
+            goal = self.goal_state
 
+            path, expansions = q_learning(start, goal)
+
+            if path:
+                self.solution_path = path
+                self.current_step = 0
+                self.playing = True
+                self.paused = False
+
+                self.status_table.insert("", "end", values=(algo, f"{len(path) * 0.001:.4f}", expansions))
+                self.set_status(
+                    f"Q-Learning đã tìm thấy đường đi.\n"
+                    f"Chiều dài đường đi: {len(path)} bước\n"
+                    f"Expansions: {expansions}"
+                )
+
+                self.animate_solution()
+            else:
+                self.set_status("Q-Learning không tìm thấy lời giải.")
+            #return
         else:
             path, expansions = None, 0
     

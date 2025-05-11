@@ -141,7 +141,8 @@ PUZZLE_AI_MIDTERM/
 ![AND-OR Search](gif/AND_OR.gif)
 
 ### 📗 Học củng cố
-
+### 🔍 Q-LEARNING
+![Q-Learning](gif/Q_LEARNING.gif)
 
 ---
 
