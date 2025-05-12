@@ -244,40 +244,14 @@ Mỗi nhóm được trình bày chi tiết với:
     - Hiệu quả phụ thuộc vào tham số (alpha, gamma, epsilon) và kích thước không gian trạng thái.
     - Tốn nhiều tài nguyên hơn các thuật toán tìm kiếm khác trong 8-puzzle.
 
-## 🖥️ Giao diện người dùng (GUI)
+## 3. Kết luận
+Dự án **8-Puzzle Visualizer** đă đạt những yêu cầu áp dụng thành công các thuật toán Trí tuệ Nhân tạo đã được học để giải bài toán 8-puzzle.
+- **Xây dựng thành công 6 nhóm thuật toán**: Dự án được tích hợp các nhóm thuật toán từ cơ bản (BFS, DFS) đến nâng cao (A*, Q-Learning,...). Mỗi nhóm được triển khai với hiệu suất khác nhau thể hiện sự đa dạng và độ phức tạp của từng thuật toán.
+- **So sánh hiệu suất chi tiết**: Các thuật toán được đánh giá dựa trên thời gian chạy và số lần mở rộng trạng thái giúp làm rõ được ưu điểm và nhược điểm của từng phương pháp được sử dụng.
+- **Xây dựng giao diện trực quan**: Giao diện người dùng sử dụng Tkinter để phát triển giúp người dùng dễ dàng nhập trạng thái ban đầu/mục tiêu có thể thêm và xóa các trạng thái đối với những nhóm cần tập các trạng thái, chọm thuật toán, theo dõi quá trình di chuyển của thuật toán. Điều này giúp người dùng hiểu rõ được cách hoạt động của các thuật toán.
+- **Giá trị học tập**: Dự án giúp sinh viên tạo công cụ học tập hiệu quả, minh họa lý thuyết Trí tuệ Nhân tạo thông qua các ví dụ trực quan (GIF) và số liệu so sánh cũng như phân tích các ưu/nhược điểm của từng phương pháp. Đồng thời giúp rèn luyện kỹ năng lập trình và xử lý các tình huống khó khăn trong quá trình code.
 
-- Giao diện hiện đại bằng Tkinter, dễ thao tác.
-- Hình ảnh hóa từng bước di chuyển trong lời giải.
-- Cho phép chọn giải thuật và chạy từng bước (step-by-step).
-- Điều chỉnh tốc độ mô phỏng theo thanh trượt.
-- Sinh ngẫu nhiên trạng thái ban đầu hợp lệ với lựa chọn độ khó.
-- Xuất báo cáo kết quả chạy dưới dạng CSV.
-- Log trực tiếp diễn tiến lời giải.
 
-## 📂 Cấu trúc thư mục
-
-```
-PUZZLE_AI_MIDTERM/
-├── algorithms/
-│ ├── pycache/
-│ ├── and_or.py
-│ ├── belief_state.py
-│ ├── constraint.py
-│ ├── evolutionary.py
-│ ├── helpers.py
-│ ├── informed.py
-│ ├── local.py
-│ └── uninformed.py
-├── app/
-│ ├── pycache/
-│ └── gui.py
-├── gif/
-│ └── *.gif
-├── main.py
-├── README.md
-```
-
----
 
 ## 👤 Tác giả
 
