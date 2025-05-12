@@ -1,8 +1,12 @@
 # 🧩 8-Puzzle Visualizer
 
-## 🧠 Giới thiệu
+## 1. Mục tiêu
 
-**8-Puzzle Visualizer** là ứng dụng được phát triển bằng Python với giao diện trực quan sử dụng `Tkinter`, nhằm mô phỏng quá trình hoạt động của các thuật toán Trí tuệ Nhân tạo trong việc giải bài toán 8-puzzle cổ điển. Ứng dụng hỗ trợ đa dạng thuật toán từ tìm kiếm không heuristic đến các kỹ thuật nâng cao như tìm kiếm niềm tin và giải thuật tiến hóa.
+Dự án **8-Puzzle Visualizer** được phát triển với các mục tiêu chính như sau:
+- **Triển khai các thuật toán AI**: Áp dụng các thuật toán được học được học trong Trí tuệ Nhân tạo (AI) để giải bài toán 8-puzzle, bao gồm các phương pháp cơ bản đến nâng cao.
+- **Xây dựng giao diện trực quan**: Tạo một giao diện người dùng (GUI) sử dụng Tkinter, cho phép người dùng nhập trạng thái bắt đầu, kết thúc, chọn thuật toán và quan sát quá trình giải chi tiết.
+- **So sánh hiệu suất**: Đánh giá hiệu quả của thuật toán dựa trên thời gian chạy và số lần mở rộng trạng thái (expansions) giúp hiểu rõ được ưu/nhược điểm của từng thuật toán sử dụng.
+-- **Hỗ trợ học tập**: Cung cấp một công cụ trực quan, dễ sử dụng để minh họa và phân tích cá thuật toán, phục vụ cho việc trực quan các thuật toán một cách dễ hiểu.
 
 ---
 
@@ -146,3 +150,4 @@ PUZZLE_AI_MIDTERM/
 ---
 
 > © 2025 – Trần Lê Quốc Đại – HCMUTE
+
