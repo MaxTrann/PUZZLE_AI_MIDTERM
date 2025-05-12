@@ -12,8 +12,8 @@ Dự án **8-Puzzle Visualizer** được phát triển với các mục tiêu c
 
 ## 2. Nội dung
 Dự án **8-Puzzle Visualizer** triển khai bài toán 8-puzzle, một bài toán cổ điển trong Trí tuệ Nhân tạo, với mục tiêu sắp xếp các ô số từ trạng thái ban đầu về trạng thái mục tiêu thông qua việc di chuyển ô trống. Dự án tích hợp **sáu nhóm thuật toán** tìm kiếm, bao gồm:
-- **Tìm kiếm có thông tin** (Informed Search): Các thuật toán sử dụng heuristic để hướng dẫn tìm kiếm một cách hiệu quả hơn.
 - **Tìm kiếm không có thông tin** (Uninformed Search): Các thuật toán dựa trên khám phá mù, không sử dụng hàm thông tin heuristic.
+- **Tìm kiếm có thông tin** (Informed Search): Các thuật toán sử dụng heuristic để hướng dẫn tìm kiếm một cách hiệu quả hơn.
 - **Tìm kiếm có ràng buộc** (Constraint Satisfaction Problem): Các thuật toán giải bài toán bằng cách gán các giá trị thỏa mãn với các ràng buộc cho trước.
 - **Tìm kiếm cục bộ** (Local Search): Các thuật toán cải thiện trạng thái dần dần dựa trên hàm đánh giá.
 - **Tìm kiếm trong môi trường phức tạp** (Searching in complex environments): Các thuật toán xử lý các tình huống không xác định hoặc quan sát không đầy đủ.
@@ -25,6 +25,9 @@ Mỗi nhóm được trình bày chi tiết với:
 - **GIF minh họa**: Hình ảnh động thể hiện quá trình giải của từng thuật toán.
 - **So sánh hiệu suất**: Bảng so sánh ghi lại thời gian thực thi và số lần mở rộng (expansions) để so sánh (cùng trạng thái ban đầu và mục tiêu).
 - **Nhận xét**: Phân tích ưu điểm, nhược điểm và hiệu quả khi áp dụng vào bài toán 8-puzzle.
+
+### 2.1. Các thuật toán Tìm kiếm không có thông tin (Uninformed Search)
+#### Thành phân chính của bài toán
 ---
 ## ⚙️ Tính năng chính
 
