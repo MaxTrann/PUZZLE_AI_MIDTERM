@@ -1,12 +1,12 @@
-# 🧩 8-Puzzle Visualizer
+# 8-Puzzle Visualizer
 
 ## 1. Mục tiêu
 
 Dự án **8-Puzzle Visualizer** được phát triển với các mục tiêu chính như sau:
-- 🧠 **Triển khai các thuật toán AI**: Áp dụng các thuật toán được học được học trong Trí tuệ Nhân tạo (AI) để giải bài toán 8-puzzle, bao gồm các phương pháp cơ bản (Breadth-First Search, Depth-First Search) đến nâng cao (A*, Genetic Problem, Q-Learning).
-- 🧩 **Xây dựng giao diện trực quan**: Tạo một giao diện người dùng (GUI) sử dụng Tkinter, cho phép người dùng nhập trạng thái bắt đầu, kết thúc, chọn thuật toán và quan sát quá trình giải chi tiết, điều chỉnh tốc độ mô phỏng, xuất kết quả dưới dạng file csv. Giao diện được tối ưu để thân thiện và hỗ trợ tương tác với người dùng.
-- 📊 **So sánh hiệu suất**: Đánh giá hiệu quả của thuật toán dựa trên thời gian chạy (tính bằng giây) và số lần mở rộng trạng thái (expansions) giúp hiểu rõ được ưu/nhược điểm của từng thuật toán sử dụng.
-- 📚 **Hỗ trợ học tập**: Cung cấp một công cụ trực quan, dễ sử dụng để minh họa và phân tích cá thuật toán, phục vụ cho việc trực quan các thuật toán một cách dễ hiểu. Bài tập cá nhân cũng là một dự án giúp củng cố lý thuyết, kỹ năng lập trình, khả năng phân tích vấn đề.
+- **Triển khai các thuật toán AI**: Áp dụng các thuật toán được học được học trong Trí tuệ Nhân tạo (AI) để giải bài toán 8-puzzle, bao gồm các phương pháp cơ bản (Breadth-First Search, Depth-First Search) đến nâng cao (A*, Genetic Problem, Q-Learning).
+- **Xây dựng giao diện trực quan**: Tạo một giao diện người dùng (GUI) sử dụng Tkinter, cho phép người dùng nhập trạng thái bắt đầu, kết thúc, chọn thuật toán và quan sát quá trình giải chi tiết, điều chỉnh tốc độ mô phỏng, xuất kết quả dưới dạng file csv. Giao diện được tối ưu để thân thiện và hỗ trợ tương tác với người dùng.
+- **So sánh hiệu suất**: Đánh giá hiệu quả của thuật toán dựa trên thời gian chạy (tính bằng giây) và số lần mở rộng trạng thái (expansions) giúp hiểu rõ được ưu/nhược điểm của từng thuật toán sử dụng.
+- **Hỗ trợ học tập**: Cung cấp một công cụ trực quan, dễ sử dụng để minh họa và phân tích cá thuật toán, phục vụ cho việc trực quan các thuật toán một cách dễ hiểu. Bài tập cá nhân cũng là một dự án giúp củng cố lý thuyết, kỹ năng lập trình, khả năng phân tích vấn đề.
 
 ---
 
