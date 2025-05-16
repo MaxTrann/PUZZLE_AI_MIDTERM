@@ -103,11 +103,12 @@ class PuzzleApp(tk.Tk):
         results_box = ttk.LabelFrame(left_frame, text="Kết Quả Thuật Toán", padding=10)
         results_box.pack(fill="x", pady=(0, 10))
         
-        self.status_table = ttk.Treeview(results_box, columns=("Algorithm", "Time", "Expansions"), show="headings", height=5)
+        self.status_table = ttk.Treeview(results_box, columns=("Algorithm", "Time", "Expansions","Steps"), show="headings", height=5)
         self.status_table.heading("Algorithm", text="Algorithm")
         self.status_table.heading("Time", text="Time (s)")
         self.status_table.heading("Expansions", text="Expansions")
-        for col in ["Algorithm", "Time", "Expansions"]:
+        self.status_table.heading("Steps", text="Steps")
+        for col in ["Algorithm", "Time", "Expansions", "Steps"]:
             self.status_table.column(col, width=110, anchor="center")
             self.status_table.heading(col, command=lambda c=col: self.sort_treeview_column(c, False))
         self.status_table.pack(fill="x")
@@ -457,7 +458,8 @@ class PuzzleApp(tk.Tk):
 
                 # Cập nhật bảng kết quả
                 expansions = len(path)
-                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                steps = len(path) - 1
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions, steps))
                 self.set_status(
                     f"Đã sinh trạng thái hợp lệ bằng CSP.\n"
                     f"Thời gian: {duration:.4f}s\n"
@@ -570,7 +572,9 @@ class PuzzleApp(tk.Tk):
                 self.paused = False
 
                 expansions = len(path)
-                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                steps = len(path) - 1
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions, steps))
+
                 self.set_status(
                     f"AC-3 + Backtrack đã tạo ra trạng thái hợp lệ.\n"
                     f"Thời gian: {duration:.4f}s\n"
@@ -593,7 +597,9 @@ class PuzzleApp(tk.Tk):
                 self.playing = True
                 self.paused = False
 
-                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions))
+                steps = len(path) - 1
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions, steps))
+
                 self.set_status(
                     f"Đã sinh trạng thái hợp lệ bằng Trial and Error.\n"
                     f"Thời gian: {duration:.4f}s\n"
@@ -616,7 +622,9 @@ class PuzzleApp(tk.Tk):
                 self.playing = True
                 self.paused = False
 
-                self.status_table.insert("", "end", values=(algo, f"{len(path) * 0.001:.4f}", expansions))
+                steps = len(path) - 1
+                self.status_table.insert("", "end", values=(algo, f"{duration:.4f}", expansions, steps))
+
                 self.set_status(
                     f"Q-Learning đã tìm thấy đường đi.\n"
                     f"Chiều dài đường đi: {len(path)} bước\n"
@@ -644,7 +652,8 @@ class PuzzleApp(tk.Tk):
             num_steps = len(path) - 1
             status_msg = f"Tìm thấy {num_steps} bước.\nThời gian: {duration:.4f}s\nExpansions: {expansions}"
             self.set_status(status_msg)
-            self.status_table.insert("", "end", values=(self.algo_var.get(), f"{duration:.4f}", expansions))
+            steps = len(path) - 1 if path else 0
+            self.status_table.insert("", "end", values=(self.algo_var.get(), f"{duration:.4f}", expansions, steps))
             self.log_box.config(state="normal")
             self.log_box.insert("1.0", status_msg + "\n")
             self.log_box.config(state="disabled")
