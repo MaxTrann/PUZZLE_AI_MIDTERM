@@ -1,6 +1,6 @@
 import random
 
-def q_learning(start_state, goal_state, episodes=5000, alpha=0.1, gamma=0.95, epsilon=0.1, max_steps=100):
+def q_learning(start_state, goal_state, episodes=10000, alpha=0.1, gamma=0.95, epsilon=0.3, max_steps=5000):
     def get_valid_actions(state):
         zero = state.index(0)
         r, c = divmod(zero, 3)
