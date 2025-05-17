@@ -24,7 +24,7 @@ from algorithms.q_learning import q_learning
 class PuzzleApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("8-Puzzle - Trần Lê Quốc Đại - 23110201")
+        self.title("8-Puzzle Visualizer - Trần Lê Quốc Đại - 23110201")
         self.geometry("1200x650")
         self.configure(bg="#F0F4F8")
 

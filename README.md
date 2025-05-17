@@ -564,12 +564,30 @@ Dự án **8-Puzzle Visualizer** được xây dựng nhằm cung cấp một c�
 
 ## 3. Kết luận
 Dự án **8-Puzzle Visualizer** đă đạt những yêu cầu áp dụng thành công các thuật toán Trí tuệ Nhân tạo đã được học để giải bài toán 8-puzzle.
-- **Xây dựng thành công 6 nhóm thuật toán**: Dự án được tích hợp các nhóm thuật toán từ cơ bản (BFS, DFS) đến nâng cao (A*, Q-Learning,...). Mỗi nhóm được triển khai với hiệu suất khác nhau thể hiện sự đa dạng và độ phức tạp của từng thuật toán.
-- **So sánh hiệu suất chi tiết**: Các thuật toán được đánh giá dựa trên thời gian chạy và số lần mở rộng trạng thái giúp làm rõ được ưu điểm và nhược điểm của từng phương pháp được sử dụng.
+- **Xây dựng thành công 6 nhóm thuật toán**: 
+    - Từ tìm kiếm không có thông tin (BFS, DFS, UCS, IDDFS) đến tìm kiếm có thông tin (Greedy, A*, IDA*).
+    - Bao gồm cả tìm kiếm có ràng buộc (Backtracking CSP, AC-3, Trial and Error).
+    - Tìm kiếm cục bộ (Hill Climbing, Simulated Annealing, Genetic, Beam...).
+    - Môi trường phức tạp (Belief-state, Sensorless, AND-OR).
+    - Học tăng cường (Q-Learning).
+
+    Mỗi thuật toán đều được triển khai chi tiết, minh họa bằng hoạt ảnh GIF, cho phép người dùng dễ dàng quan sát quá trình giải thuật.
+- **So sánh hiệu suất chi tiết**:
+    - Dự án hỗ trợ ghi nhận thời gian thực thi, số lần mở rộng trạng thái, số bước đi, giúp đánh giá hiệu quả tương đối giữa các thuật toán khi giải cùng một bài toán.
+    - Đây là điểm mạnh giúp sinh viên hiểu sâu hơn về ưu điểm - hạn chế của từng phương pháp.
 - **Xây dựng giao diện trực quan**: Giao diện người dùng sử dụng Tkinter để phát triển giúp người dùng dễ dàng nhập trạng thái ban đầu/mục tiêu có thể thêm và xóa các trạng thái đối với những nhóm cần tập các trạng thái, chọm thuật toán, theo dõi quá trình di chuyển của thuật toán. Điều này giúp người dùng hiểu rõ được cách hoạt động của các thuật toán.
+- **Hỗ trợ xuất kết quả ra file CSV**:
+    - Người dùng có thể xuất kết quả các thuật toán đã chạy vào file .csv bao gồm thông tin:
+        - Trạng thái bắt đầu, trạng thái mục tiêu,
+        - Tên thuật toán,
+        - Thời gian chạy,
+        - Số lần mở rộng trạng thái,
+        - Số bước đi.
+
+    ![CSV Overview](img/csv1.png)
+    ![CSV Overview](img/csv2.png)
+    - Tính năng này rất hữu ích cho việc thống kê, phân tích hoặc báo cáo học thuật.
 - **Giá trị học tập**: Dự án giúp sinh viên tạo công cụ học tập hiệu quả, minh họa lý thuyết Trí tuệ Nhân tạo thông qua các ví dụ trực quan (GIF) và số liệu so sánh cũng như phân tích các ưu/nhược điểm của từng phương pháp. Đồng thời giúp rèn luyện kỹ năng lập trình và xử lý các tình huống khó khăn trong quá trình code.
-
-
 
 ## 👤 Tác giả
 
