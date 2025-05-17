@@ -405,6 +405,7 @@ Dự án **8-Puzzle Visualizer** được xây dựng nhằm cung cấp một c�
 #### So sánh thuật toán
 ![Constraint Satisfaction Problem Overview](img/constraint.png)
 
+***Kết quả so sánh sẽ khác trên gif do cơ chế xáo trộn để làm gia tăng tính ngẫu nhiên. Vì thế khi test hãy test cùng 1 lúc để có thể thấy rõ hơn.***
 #### Nhận xét
 - **Backtracking CSP:** Dễ hiểu và hiệu quả trong các bài toán nhỏ, nhưng dễ bị quay lui sâu khi không tối ưu miền.
 - **Backtracking AC3:** Tối ưu hóa quá trình gán giá trị bằng cách loại trừ sớm, nhưng cần xử lý thêm bước chuẩn hóa miền.
@@ -490,7 +491,6 @@ Dự án **8-Puzzle Visualizer** được xây dựng nhằm cung cấp một c�
 
 #### So sánh thuật toán
 ![Complex Search Overview](img/complex1.png)
-![Complex Search Overview](img/complex2.png)
 
 #### Nhận xét
 - **Sensorless Search:** Phù hợp khi không biết trạng thái ban đầu nhưng rất tốn tài nguyên và khó thu hẹp tập trạng thái.

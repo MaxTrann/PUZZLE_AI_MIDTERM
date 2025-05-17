@@ -613,9 +613,10 @@ class PuzzleApp(tk.Tk):
         elif algo == "Q-Learning":
             start = self.start_state
             goal = self.goal_state
+            start_time = time.perf_counter()
 
             path, expansions = q_learning(start, goal)
-
+            duration = time.perf_counter() - start_time
             if path:
                 self.solution_path = path
                 self.current_step = 0
