@@ -277,19 +277,45 @@ class PuzzleApp(tk.Tk):
             self.status_table.delete(item)
 
     def export_to_file(self):
-        file_name = "algorithm_results.csv"
         try:
+            start_list = self.read_all_beliefs(self.belief_start_list)
+            goal_list = self.read_all_beliefs(self.belief_goal_list)
+
+            if not start_list or not goal_list:
+                self.set_status("Không thể xuất: thiếu trạng thái START hoặc GOAL.")
+                return
+
+            file_name = "algorithm_results.csv"
             with open(file_name, mode='w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
-                writer.writerow(["Start", "Goal", "Algorithm", "Time (s)", "Expansions"])
+                writer.writerow(["Start", "Goal", "Algorithm", "Time (s)", "Expansions", "Steps"])
                 for row_id in self.status_table.get_children():
-                    algo, time_sec, expansions = self.status_table.item(row_id)["values"]
-                    start_str = self.state_to_string(self.start_state)
-                    goal_str = self.state_to_string(self.goal_state)
-                    writer.writerow([start_str, goal_str, algo, time_sec, expansions])
+                    algo, time_sec, expansions, steps = self.status_table.item(row_id)["values"]
+                    start_str = self.state_to_export_string(start_list)
+                    goal_str = self.state_to_export_string(goal_list)
+                    writer.writerow([start_str, goal_str, algo, time_sec, expansions, steps])
             self.set_status(f"Đã xuất dữ liệu ra file '{file_name}'")
         except Exception as e:
             self.set_status(f"Lỗi khi xuất file: {e}")
+
+
+
+    def state_to_export_string(self, state):
+        if state is None:
+            return "None"
+        def format_single(s):
+            if isinstance(s, list):
+                flat = [str(num) for row in s for num in row]
+            else:
+                flat = [str(num) for num in s]
+            return "(" + ", ".join(flat) + ")"
+
+        if isinstance(state, list) and all(isinstance(item, (list, tuple)) for item in state):
+            # Danh sách nhiều trạng thái
+            return "[" + "; ".join(format_single(s) for s in state) + "]"
+        else:
+            # Một trạng thái đơn
+            return format_single(state)
 
     def read_3x3_matrix(self, matrix_3x3):
         vals = []
