@@ -589,6 +589,10 @@ Dự án **8-Puzzle Visualizer** đă đạt những yêu cầu áp dụng thàn
     - Tính năng này rất hữu ích cho việc thống kê, phân tích hoặc báo cáo học thuật.
 - **Giá trị học tập**: Dự án giúp sinh viên tạo công cụ học tập hiệu quả, minh họa lý thuyết Trí tuệ Nhân tạo thông qua các ví dụ trực quan (GIF) và số liệu so sánh cũng như phân tích các ưu/nhược điểm của từng phương pháp. Đồng thời giúp rèn luyện kỹ năng lập trình và xử lý các tình huống khó khăn trong quá trình code.
 
+## 📺 Video Báo Cáo Dự Án
+
+[![Xem Video Báo Cáo](https://img.youtube.com/vi/abc123xyz/0.jpg)](https://youtu.be/qgdHPjk1bFw)
+
 ## 👤 Tác giả
 
 - **Trần Lê Quốc Đại**  
