@@ -45,7 +45,7 @@ def sensorless_search(start_set, goal_set):
         visited.add(key)
         expansions += 1
 
-        # ✅ Điều kiện dừng: nếu ANY state trong belief match goal
+        # Điều kiện dừng: nếu ANY state trong belief match goal
         if any(st in goal_set for st in belief):
             return path, expansions
 
